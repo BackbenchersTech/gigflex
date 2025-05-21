@@ -15,7 +15,8 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { 
   CalendarClock, 
   MapPin, 
-  Briefcase 
+  Briefcase,
+  DollarSign
 } from "lucide-react";
 import CandidateDetail from "@/components/candidate-detail";
 import { formatExperienceYears } from "@/lib/utils";
@@ -68,6 +69,13 @@ const CandidateCard = ({ candidate }: CandidateCardProps) => {
               <CalendarClock className="h-4 w-4 mr-2" />
               <span>Available {candidate.availability.toLowerCase()}</span>
             </div>
+            
+            {candidate.billRate && (
+              <div className="flex items-center text-sm text-muted-foreground mt-1">
+                <DollarSign className="h-4 w-4 mr-2" />
+                <span>${candidate.billRate}/hr</span>
+              </div>
+            )}
           </CardContent>
           
           <CardFooter className="px-6 pb-6 pt-0 flex flex-wrap gap-2">

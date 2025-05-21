@@ -39,7 +39,8 @@ import {
   Mail, 
   Plus, 
   X,
-  MoreHorizontal
+  MoreHorizontal,
+  Users
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -213,6 +214,8 @@ const CandidateList = () => {
                 <TableHead>Title</TableHead>
                 <TableHead>Skills</TableHead>
                 <TableHead>Experience</TableHead>
+                <TableHead>Bill Rate</TableHead>
+                <TableHead>Pay Rate</TableHead>
                 <TableHead>Availability</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -257,6 +260,8 @@ const CandidateList = () => {
                     </div>
                   </TableCell>
                   <TableCell>{candidate.experienceYears} years</TableCell>
+                  <TableCell>{candidate.billRate ? `$${candidate.billRate}/hr` : "—"}</TableCell>
+                  <TableCell>{candidate.payRate ? `$${candidate.payRate}/hr` : "—"}</TableCell>
                   <TableCell>{candidate.availability}</TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
