@@ -2,6 +2,8 @@ import {
   candidates, Candidate, InsertCandidate,
   interests, Interest, InsertInterest
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, ilike, gte, and, or, inArray } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -26,19 +28,132 @@ export interface IStorage {
   updateInterestStatus(id: number, status: string): Promise<Interest | undefined>;
 }
 
-export class MemStorage implements IStorage {
-  private candidates: Map<number, Candidate>;
-  private interests: Map<number, Interest>;
-  private candidateCounter: number;
-  private interestCounter: number;
+// Database implementation
+export class DatabaseStorage implements IStorage {
+  // Candidate operations
+  async getCandidates(): Promise<Candidate[]> {
+    return await db.select().from(candidates);
+  }
 
-  constructor() {
-    this.candidates = new Map();
-    this.interests = new Map();
-    this.candidateCounter = 1;
-    this.interestCounter = 1;
+  async getCandidateById(id: number): Promise<Candidate | undefined> {
+    const results = await db.select().from(candidates).where(eq(candidates.id, id));
+    return results.length > 0 ? results[0] : undefined;
+  }
 
-    // Initialize some sample candidates
+  async createCandidate(candidate: InsertCandidate): Promise<Candidate> {
+    const newCandidate = {
+      ...candidate,
+      profileImageUrl: candidate.profileImageUrl || null,
+      contactEmail: candidate.contactEmail || null,
+      contactPhone: candidate.contactPhone || null,
+      certifications: candidate.certifications || null
+    };
+    
+    const [insertedCandidate] = await db.insert(candidates).values(newCandidate).returning();
+    return insertedCandidate;
+  }
+
+  async updateCandidate(id: number, candidateData: Partial<InsertCandidate>): Promise<Candidate | undefined> {
+    const result = await db.update(candidates)
+      .set(candidateData)
+      .where(eq(candidates.id, id))
+      .returning();
+    
+    return result.length > 0 ? result[0] : undefined;
+  }
+
+  async deleteCandidate(id: number): Promise<boolean> {
+    const result = await db.delete(candidates).where(eq(candidates.id, id)).returning();
+    return result.length > 0;
+  }
+
+  async searchCandidates(query: string): Promise<Candidate[]> {
+    if (!query) return this.getCandidates();
+    
+    return await db.select().from(candidates).where(
+      or(
+        ilike(candidates.fullName, `%${query}%`),
+        ilike(candidates.title, `%${query}%`),
+        ilike(candidates.location, `%${query}%`),
+        ilike(candidates.bio, `%${query}%`)
+        // Note: Searching in array fields like skills requires more complex logic
+        // This is a simplified implementation
+      )
+    );
+  }
+
+  async filterCandidates(
+    skills?: string[], 
+    experienceYears?: number, 
+    availability?: string
+  ): Promise<Candidate[]> {
+    let conditions = [];
+    
+    // Add filters based on parameters
+    if (skills && skills.length > 0) {
+      // This is a simplified approach. For exact array matching,
+      // you might need to use database-specific functions
+      conditions.push(inArray(candidates.skills, skills));
+    }
+    
+    if (experienceYears !== undefined) {
+      conditions.push(gte(candidates.experienceYears, experienceYears));
+    }
+    
+    if (availability) {
+      conditions.push(eq(candidates.availability, availability));
+    }
+    
+    // If no conditions, return all candidates
+    if (conditions.length === 0) {
+      return this.getCandidates();
+    }
+    
+    // Apply all conditions with AND logic
+    return await db.select().from(candidates).where(and(...conditions));
+  }
+
+  // Interest operations
+  async getInterests(): Promise<Interest[]> {
+    return await db.select().from(interests);
+  }
+
+  async getInterestById(id: number): Promise<Interest | undefined> {
+    const results = await db.select().from(interests).where(eq(interests.id, id));
+    return results.length > 0 ? results[0] : undefined;
+  }
+
+  async getInterestsByCandidate(candidateId: number): Promise<Interest[]> {
+    return await db.select().from(interests).where(eq(interests.candidateId, candidateId));
+  }
+
+  async createInterest(interest: InsertInterest): Promise<Interest> {
+    const newInterest = {
+      ...interest,
+      phone: interest.phone || null,
+      message: interest.message || null
+    };
+    
+    const [insertedInterest] = await db.insert(interests).values(newInterest).returning();
+    return insertedInterest;
+  }
+
+  async updateInterestStatus(id: number, status: string): Promise<Interest | undefined> {
+    const result = await db.update(interests)
+      .set({ status })
+      .where(eq(interests.id, id))
+      .returning();
+    
+    return result.length > 0 ? result[0] : undefined;
+  }
+}
+
+// Initialize sample data
+async function seedDatabase() {
+  const count = await db.select().from(candidates);
+  
+  // Only seed if the database is empty
+  if (count.length === 0) {
     const sampleCandidates: InsertCandidate[] = [
       {
         initials: "JD",
@@ -170,112 +285,22 @@ export class MemStorage implements IStorage {
       }
     ];
 
-    // Add sample candidates
-    sampleCandidates.forEach(candidate => {
-      this.createCandidate(candidate);
-    });
-  }
-
-  // Candidate operations
-  async getCandidates(): Promise<Candidate[]> {
-    return Array.from(this.candidates.values());
-  }
-
-  async getCandidateById(id: number): Promise<Candidate | undefined> {
-    return this.candidates.get(id);
-  }
-
-  async createCandidate(candidate: InsertCandidate): Promise<Candidate> {
-    const id = this.candidateCounter++;
-    const newCandidate: Candidate = { ...candidate, id, createdAt: new Date() };
-    this.candidates.set(id, newCandidate);
-    return newCandidate;
-  }
-
-  async updateCandidate(id: number, candidateData: Partial<InsertCandidate>): Promise<Candidate | undefined> {
-    const existingCandidate = this.candidates.get(id);
-    if (!existingCandidate) return undefined;
-
-    const updatedCandidate: Candidate = { ...existingCandidate, ...candidateData };
-    this.candidates.set(id, updatedCandidate);
-    return updatedCandidate;
-  }
-
-  async deleteCandidate(id: number): Promise<boolean> {
-    return this.candidates.delete(id);
-  }
-
-  async searchCandidates(query: string): Promise<Candidate[]> {
-    if (!query) return Array.from(this.candidates.values());
+    // Create a new storage instance to add sample data
+    const storage = new DatabaseStorage();
     
-    const lowercaseQuery = query.toLowerCase();
-    return Array.from(this.candidates.values()).filter(candidate => 
-      candidate.fullName.toLowerCase().includes(lowercaseQuery) ||
-      candidate.title.toLowerCase().includes(lowercaseQuery) ||
-      candidate.location.toLowerCase().includes(lowercaseQuery) ||
-      candidate.skills.some(skill => skill.toLowerCase().includes(lowercaseQuery)) ||
-      candidate.bio.toLowerCase().includes(lowercaseQuery)
-    );
-  }
-
-  async filterCandidates(
-    skills?: string[], 
-    experienceYears?: number, 
-    availability?: string
-  ): Promise<Candidate[]> {
-    let filteredCandidates = Array.from(this.candidates.values());
-
-    if (skills && skills.length > 0) {
-      filteredCandidates = filteredCandidates.filter(candidate => 
-        skills.some(skill => candidate.skills.includes(skill))
-      );
+    // Add sample candidates sequentially
+    for (const candidate of sampleCandidates) {
+      await storage.createCandidate(candidate);
     }
-
-    if (experienceYears !== undefined) {
-      filteredCandidates = filteredCandidates.filter(candidate => 
-        candidate.experienceYears >= experienceYears
-      );
-    }
-
-    if (availability) {
-      filteredCandidates = filteredCandidates.filter(candidate => 
-        candidate.availability === availability
-      );
-    }
-
-    return filteredCandidates;
-  }
-
-  // Interest operations
-  async getInterests(): Promise<Interest[]> {
-    return Array.from(this.interests.values());
-  }
-
-  async getInterestById(id: number): Promise<Interest | undefined> {
-    return this.interests.get(id);
-  }
-
-  async getInterestsByCandidate(candidateId: number): Promise<Interest[]> {
-    return Array.from(this.interests.values()).filter(
-      interest => interest.candidateId === candidateId
-    );
-  }
-
-  async createInterest(interest: InsertInterest): Promise<Interest> {
-    const id = this.interestCounter++;
-    const newInterest: Interest = { ...interest, id, createdAt: new Date() };
-    this.interests.set(id, newInterest);
-    return newInterest;
-  }
-
-  async updateInterestStatus(id: number, status: string): Promise<Interest | undefined> {
-    const existingInterest = this.interests.get(id);
-    if (!existingInterest) return undefined;
-
-    const updatedInterest: Interest = { ...existingInterest, status };
-    this.interests.set(id, updatedInterest);
-    return updatedInterest;
+    
+    console.log("Database seeded with sample data");
   }
 }
 
-export const storage = new MemStorage();
+// Initialize the storage
+export const storage = new DatabaseStorage();
+
+// Seed the database with initial data (this runs when the server starts)
+seedDatabase().catch(err => {
+  console.error("Error seeding database:", err);
+});
