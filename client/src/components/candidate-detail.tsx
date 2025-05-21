@@ -95,7 +95,7 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
             <>
               {/* Bio Section */}
               <Card>
-                <CardHeader className="pb-2">
+                <CardHeader className="pb-2 pl-4">
                   <CardTitle className="text-lg flex items-center">
                     <BookOpen className="h-5 w-5 mr-2 text-primary" />
                     Professional Summary
@@ -110,7 +110,7 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
 
               {/* Skills Section */}
               <Card>
-                <CardHeader className="pb-2">
+                <CardHeader className="pb-2 pl-4">
                   <CardTitle className="text-lg flex items-center">
                     <Star className="h-5 w-5 mr-2 text-primary" />
                     Skills
@@ -129,7 +129,7 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
 
               {/* Professional Details */}
               <Card>
-                <CardHeader className="pb-2">
+                <CardHeader className="pb-2 pl-4">
                   <CardTitle className="text-lg flex items-center">
                     <Briefcase className="h-5 w-5 mr-2 text-primary" />
                     Professional Details
@@ -156,7 +156,7 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
               {/* Certifications */}
               {candidate.certifications && candidate.certifications.length > 0 && (
                 <Card>
-                  <CardHeader className="pb-2">
+                  <CardHeader className="pb-2 pl-4">
                     <CardTitle className="text-lg flex items-center">
                       <Medal className="h-5 w-5 mr-2 text-primary" />
                       Certifications & Achievements
@@ -177,7 +177,7 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
 
               {/* Project Experience */}
               <Card>
-                <CardHeader className="pb-2">
+                <CardHeader className="pb-2 pl-4">
                   <CardTitle className="text-lg flex items-center">
                     <GanttChart className="h-5 w-5 mr-2 text-primary" />
                     Project Experience
@@ -212,7 +212,7 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
 
               {/* Testimonials Section */}
               <Card>
-                <CardHeader className="pb-2">
+                <CardHeader className="pb-2 pl-4">
                   <CardTitle className="text-lg flex items-center">
                     <Users className="h-5 w-5 mr-2 text-primary" />
                     Testimonials
