@@ -47,12 +47,6 @@ const CandidateCard = ({ candidate }: CandidateCardProps) => {
                 </Avatar>
                 <div className="ml-3">
                   <h3 className="text-lg font-semibold">{candidate.initials}</h3>
-                  {candidate.billRate && (
-                    <div className="flex items-center mt-1 text-green-600 dark:text-green-400 font-medium">
-                      <DollarSign className="h-3.5 w-3.5 mr-1" />
-                      <span>${candidate.billRate}/hr</span>
-                    </div>
-                  )}
                 </div>
               </div>
               <Badge variant="outline" className="uppercase text-xs">
