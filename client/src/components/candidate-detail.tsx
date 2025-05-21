@@ -235,7 +235,7 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
         </div>
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 bg-slate-50 dark:bg-gray-900 border-t z-50 flex justify-between items-center h-14">
+      <div className="fixed inset-x-0 bottom-0 bg-slate-50 dark:bg-gray-900 border-t z-50 flex justify-between items-center h-14 shadow-sm">
         <Button type="button" onClick={onClose} variant="outline" className="ml-4">
           Close
         </Button>
