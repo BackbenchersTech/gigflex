@@ -119,7 +119,7 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
                 <CardContent className="pl-6">
                   <div className="flex flex-wrap gap-2">
                     {candidate.skills.map((skill) => (
-                      <Badge key={skill} variant="secondary" className="bg-slate-100 text-slate-800 hover:bg-slate-200 rounded-md text-xs font-normal">
+                      <Badge key={skill} variant="secondary" className="bg-slate-100 text-slate-800 hover:bg-slate-200 rounded-md text-[10px] font-normal">
                         {skill}
                       </Badge>
                     ))}
