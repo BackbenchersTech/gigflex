@@ -31,6 +31,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { 
   Pencil, 
   Trash, 
@@ -168,6 +170,39 @@ const CandidateList = () => {
           <Plus className="mr-2 h-4 w-4" />
           Add Candidate
         </Button>
+      </div>
+      
+      <div className="flex flex-col md:flex-row gap-4 mb-4">
+        <div className="relative flex-grow">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search candidates..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-2 top-2 h-5 w-5"
+              onClick={() => setSearchQuery("")}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <Checkbox 
+            id="show-inactive" 
+            checked={showInactive}
+            onCheckedChange={(checked) => setShowInactive(checked === true)}
+          />
+          <Label htmlFor="show-inactive" className="text-sm font-medium cursor-pointer">
+            Show inactive candidates
+          </Label>
+        </div>
       </div>
 
       <div className="relative">
