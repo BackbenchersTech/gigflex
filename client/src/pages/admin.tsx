@@ -12,7 +12,7 @@ import { type Interest } from "@shared/schema";
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState("candidates");
   
-  const { data: interests = [] } = useQuery<Interest[]>({
+  const { data: interests = [] } = useQuery<(Interest & { candidateName?: string })[]>({
     queryKey: ["/api/interests"]
   });
 
@@ -72,7 +72,7 @@ const AdminPage = () => {
                       {interests.map((interest) => (
                         <TableRow key={interest.id}>
                           <TableCell>
-                            Candidate #{interest.candidateId}
+                            {interest.candidateName || `Candidate #${interest.candidateId}`}
                           </TableCell>
                           <TableCell>{interest.companyName}</TableCell>
                           <TableCell>{interest.contactName}</TableCell>
@@ -91,7 +91,7 @@ const AdminPage = () => {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            {interest.createdAt ? new Date(interest.createdAt).toLocaleDateString() : "—"}
+                            {interest.createdAt ? formatDateTime(interest.createdAt) : "—"}
                           </TableCell>
                         </TableRow>
                       ))}
