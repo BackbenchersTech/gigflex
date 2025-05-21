@@ -18,6 +18,8 @@ export const candidates = pgTable("candidates", {
   contactEmail: text("contact_email"),
   contactPhone: text("contact_phone"),
   certifications: text("certifications").array(),
+  billRate: integer("bill_rate"),
+  payRate: integer("pay_rate"),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });

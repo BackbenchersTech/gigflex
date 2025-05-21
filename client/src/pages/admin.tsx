@@ -83,7 +83,7 @@ const AdminPage = () => {
                               variant={
                                 interest.status === "new" ? "default" :
                                 interest.status === "contacted" ? "secondary" :
-                                interest.status === "accepted" ? "success" :
+                                interest.status === "accepted" ? "outline" :
                                 "destructive"
                               }
                             >
@@ -91,7 +91,7 @@ const AdminPage = () => {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            {new Date(interest.createdAt).toLocaleDateString()}
+                            {interest.createdAt ? new Date(interest.createdAt).toLocaleDateString() : "—"}
                           </TableCell>
                         </TableRow>
                       ))}

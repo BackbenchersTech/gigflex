@@ -52,6 +52,8 @@ const CandidateForm = ({ candidate, onSuccess }: CandidateFormProps) => {
       contactEmail: candidate?.contactEmail || "",
       contactPhone: candidate?.contactPhone || "",
       certifications: candidate?.certifications || [],
+      billRate: candidate?.billRate || undefined,
+      payRate: candidate?.payRate || undefined,
       isActive: candidate?.isActive ?? true,
     },
   });
@@ -330,6 +332,56 @@ const CandidateForm = ({ candidate, onSuccess }: CandidateFormProps) => {
                     <FormControl>
                       <Input placeholder="Phone (private)" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="billRate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bill Rate ($/hr)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        min={0} 
+                        placeholder="Hourly bill rate" 
+                        {...field} 
+                        value={field.value || ''} 
+                        onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : null)} 
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      The hourly rate charged to clients.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="payRate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Pay Rate ($/hr)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        min={0} 
+                        placeholder="Hourly pay rate"
+                        {...field} 
+                        value={field.value || ''} 
+                        onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : null)} 
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      The hourly rate paid to the candidate (internal only).
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
