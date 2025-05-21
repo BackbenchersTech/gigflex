@@ -44,7 +44,7 @@ const CandidateForm = ({ candidate, onSuccess }: CandidateFormProps) => {
       fullName: candidate?.fullName || "",
       title: candidate?.title || "",
       location: candidate?.location || "",
-      skills: candidate?.skills ? candidate.skills.join(", ") : "",
+      skills: candidate?.skills || [],
       experienceYears: candidate?.experienceYears || 0,
       bio: candidate?.bio || "",
       education: candidate?.education || "",

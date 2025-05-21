@@ -46,7 +46,7 @@ export class DatabaseStorage implements IStorage {
       profileImageUrl: candidate.profileImageUrl || null,
       contactEmail: candidate.contactEmail || null,
       contactPhone: candidate.contactPhone || null,
-      certifications: candidate.certifications || null
+      certifications: candidate.certifications || []
     };
     
     const [insertedCandidate] = await db.insert(candidates).values(newCandidate).returning();
@@ -60,7 +60,7 @@ export class DatabaseStorage implements IStorage {
       profileImageUrl: candidateData.profileImageUrl || null,
       contactEmail: candidateData.contactEmail || null,
       contactPhone: candidateData.contactPhone || null,
-      certifications: candidateData.certifications || null
+      certifications: candidateData.certifications || []
     };
     
     const result = await db.update(candidates)
@@ -77,13 +77,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async searchCandidates(query: string): Promise<Candidate[]> {
+    // If query is empty, return all active candidates
     if (!query || !query.trim()) {
-      // Return all active candidates if no query
       return db.select().from(candidates).where(eq(candidates.isActive, true));
     }
     
+    // Get all candidates to filter in memory
+    const allCandidates = await db.select().from(candidates).where(eq(candidates.isActive, true));
+    
     // Extract potential years of experience from query
-    // Match patterns like "5 years", "3+ years", "over 2 years of experience"
     const experienceMatch = query.match(/(\d+)\s*(?:\+)?\s*(?:years?|yrs?)\s*(?:of\s*)?(?:experience|exp)?|\b(?:over|more\s+than)\s+(\d+)\s*(?:years?|yrs?)/i);
     const experienceYears = experienceMatch ? parseInt(experienceMatch[1] || experienceMatch[2]) : null;
     
@@ -99,32 +101,26 @@ export class DatabaseStorage implements IStorage {
       'fullstack', 'frontend', 'backend', 'data', 'ai', 'ml', 'machine learning'
     ];
     
-    // Extract availability from query (immediate, x weeks, etc.)
-    const availabilityMatch = query.match(/\b(immediate|immediately|available\s+now|(\d+)\s*(?:week|wk|day|month|mth)s?)(?:\s+availability)?\b/i);
-    const availabilityTerm = availabilityMatch ? availabilityMatch[0].toLowerCase() : null;
-    
-    // Convert the skills array to a regex-safe pattern
+    // Pattern for extracting skills
     const skillsPattern = skills.map(s => s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')).join('|');
     const skillRegex = new RegExp(`\\b(${skillsPattern})\\b`, 'gi');
     const foundSkills = query.match(skillRegex) || [];
     
-    // Normalize and deduplicate skills
+    // Normalize skills for comparison
     const lowerCaseSkills = foundSkills.map(s => s.toLowerCase());
     const normalizedSkills = lowerCaseSkills.filter((skill, index) => 
       lowerCaseSkills.indexOf(skill) === index
     );
     
-    // We'll use a simpler approach for natural language search by doing in-memory filtering
-    // This is more reliable and flexible for complex queries
-    const allCandidates = await this.getCandidates();
+    // Extract availability from query
+    const availabilityMatch = query.match(/\b(immediate|immediately|available\s+now|(\d+)\s*(?:week|wk|day|month|mth)s?)(?:\s+availability)?\b/i);
+    const availabilityTerm = availabilityMatch ? availabilityMatch[0].toLowerCase() : null;
     
+    // Filter candidates based on extracted criteria
     return allCandidates.filter(candidate => {
-      // Only show active candidates
-      if (!candidate.isActive) return false;
-      
       // If we have specific extracted criteria, apply those filters
       if (normalizedSkills.length > 0 || experienceYears !== null || availabilityTerm !== null) {
-        // Match by skills (any of the detected skills should be present)
+        // Match by skills
         const skillsMatch = normalizedSkills.length === 0 || 
           normalizedSkills.some(querySkill => 
             candidate.skills.some(candidateSkill => 
@@ -142,7 +138,7 @@ export class DatabaseStorage implements IStorage {
           
         return skillsMatch && experienceMatch && availabilityMatch;
       } else {
-        // Otherwise do a basic text search across all relevant fields
+        // Basic text search across all relevant fields
         const searchLower = query.toLowerCase();
         
         return (
@@ -156,37 +152,40 @@ export class DatabaseStorage implements IStorage {
       }
     });
   }
-  }
 
   async filterCandidates(
     skills?: string[], 
     experienceYears?: number, 
     availability?: string
   ): Promise<Candidate[]> {
-    let conditions = [];
+    // Get all candidates
+    const allCandidates = await this.getCandidates();
     
-    // Add filters based on parameters
-    if (skills && skills.length > 0) {
-      // For PostgreSQL array filtering, we'll need a more complex approach later
-      // For now, let's just fetch all candidates and filter them in memory
-      console.log("Filtering for skills:", skills);
+    // If no filters, return all
+    if (!skills?.length && experienceYears === undefined && !availability) {
+      return allCandidates;
     }
     
-    if (experienceYears !== undefined) {
-      conditions.push(gte(candidates.experienceYears, experienceYears));
-    }
-    
-    if (availability) {
-      conditions.push(eq(candidates.availability, availability));
-    }
-    
-    // If no conditions, return all candidates
-    if (conditions.length === 0) {
-      return this.getCandidates();
-    }
-    
-    // Apply all conditions with AND logic
-    return await db.select().from(candidates).where(and(...conditions));
+    // Filter in memory (more flexible than SQL for array handling)
+    return allCandidates.filter(candidate => {
+      // Filter by skills if provided
+      const skillsMatch = !skills?.length || 
+        skills.some(skill => 
+          candidate.skills.some(candidateSkill => 
+            candidateSkill.toLowerCase().includes(skill.toLowerCase())
+          )
+        );
+      
+      // Filter by experience if provided
+      const experienceMatch = experienceYears === undefined || 
+        candidate.experienceYears >= experienceYears;
+      
+      // Filter by availability if provided
+      const availabilityMatch = !availability || 
+        candidate.availability.toLowerCase() === availability.toLowerCase();
+      
+      return skillsMatch && experienceMatch && availabilityMatch;
+    });
   }
 
   // Interest operations
@@ -224,7 +223,10 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-// Initialize sample data
+// Initialize the storage
+export const storage = new DatabaseStorage();
+
+// Seed function (run at startup)
 async function seedDatabase() {
   const count = await db.select().from(candidates);
   
