@@ -10,17 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
-} from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
 import InterestForm from "@/components/interest-form";
 import { 
   Briefcase, 
-  Calendar, 
   MapPin, 
   GraduationCap, 
   Award, 
@@ -43,10 +35,10 @@ interface CandidateDetailProps {
 }
 
 const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
-  const [activeTab, setActiveTab] = useState("details");
+  const [showInterestForm, setShowInterestForm] = useState(false);
 
   return (
-    <>
+    <div className="relative pb-20">
       <DialogHeader className="text-left">
         <div className="flex items-center gap-4">
           <Avatar className="h-20 w-20 border-2 border-primary">
@@ -82,141 +74,8 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
         </div>
       </DialogHeader>
 
-      <Tabs 
-        value={activeTab} 
-        onValueChange={setActiveTab}
-        className="mt-6"
-      >
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="details">Details</TabsTrigger>
-          <TabsTrigger value="express-interest">Express Interest</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="details" className="mt-6 space-y-6">
-          {/* Bio Section */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center">
-                <BookOpen className="h-5 w-5 mr-2 text-primary" />
-                Professional Summary
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                {candidate.bio || "Experienced professional with a proven track record in the industry."}
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Skills Section */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center">
-                <Star className="h-5 w-5 mr-2 text-primary" />
-                Skills
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {candidate.skills.map((skill) => (
-                  <Badge key={skill} className="px-3 py-1">
-                    {skill}
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Professional Details */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center">
-                <Briefcase className="h-5 w-5 mr-2 text-primary" />
-                Professional Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Industry Experience</p>
-                  <p className="font-medium">{formatExperienceYears(candidate.experienceYears)}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Availability</p>
-                  <p className="font-medium">{candidate.availability}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Education</p>
-                  <p className="font-medium">{candidate.education}</p>
-                </div>
-                {candidate.payRate && (
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Pay Rate</p>
-                    <p className="font-medium">${candidate.payRate}/hr</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Project Experience */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center">
-                <GanttChart className="h-5 w-5 mr-2 text-primary" />
-                Project Experience
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="border-l-2 border-gray-200 pl-4 relative">
-                  <div className="absolute w-3 h-3 bg-primary rounded-full -left-[7px] top-1"></div>
-                  <h4 className="text-base font-medium">Senior Role</h4>
-                  <p className="text-sm text-muted-foreground mb-1">
-                    {candidate.experienceYears > 5 ? "5+ years" : `${Math.max(1, candidate.experienceYears-2)}+ years`}
-                  </p>
-                  <p className="text-sm">
-                    Led cross-functional teams and delivered key projects in {candidate.skills.slice(0, 2).join(" and ")} technologies.
-                  </p>
-                </div>
-
-                <div className="border-l-2 border-gray-200 pl-4 relative">
-                  <div className="absolute w-3 h-3 bg-gray-400 rounded-full -left-[7px] top-1"></div>
-                  <h4 className="text-base font-medium">Earlier Experience</h4>
-                  <p className="text-sm text-muted-foreground mb-1">
-                    {candidate.experienceYears > 3 ? "3+ years" : "1-2 years"}
-                  </p>
-                  <p className="text-sm">
-                    Developed expertise in {candidate.skills.slice(1, 3).join(", ")} and contributed to various projects.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Recommendations/Testimonials (sample) */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center">
-                <Users className="h-5 w-5 mr-2 text-primary" />
-                Testimonials
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="bg-muted/50 p-3 rounded-lg relative">
-                  <div className="absolute top-0 right-0 p-2 text-2xl text-muted-foreground">"</div>
-                  <p className="text-sm italic">
-                    A {candidate.experienceYears > 5 ? "seasoned" : "talented"} professional who consistently delivers high-quality work. Their expertise in {candidate.skills[0]} was particularly valuable to our project.
-                  </p>
-                  <p className="text-sm font-medium mt-2">— Previous Client</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="express-interest" className="mt-6">
+      <div className="mt-6 space-y-6">
+        {showInterestForm ? (
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center">
@@ -231,24 +90,166 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
               <InterestForm candidateId={candidate.id} />
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+        ) : (
+          <>
+            {/* Bio Section */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <BookOpen className="h-5 w-5 mr-2 text-primary" />
+                  Professional Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  {candidate.bio || "Experienced professional with a proven track record in the industry."}
+                </p>
+              </CardContent>
+            </Card>
 
-      <DialogFooter className="mt-6">
+            {/* Skills Section */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <Star className="h-5 w-5 mr-2 text-primary" />
+                  Skills
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {candidate.skills.map((skill) => (
+                    <Badge key={skill} variant="secondary" className="bg-slate-100 text-slate-800 hover:bg-slate-200 rounded-md text-xs font-normal">
+                      {skill}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Professional Details */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <Briefcase className="h-5 w-5 mr-2 text-primary" />
+                  Professional Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Industry Experience</p>
+                    <p className="font-medium">{formatExperienceYears(candidate.experienceYears)}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Availability</p>
+                    <p className="font-medium">{candidate.availability}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Education</p>
+                    <p className="font-medium">{candidate.education}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Certifications */}
+            {candidate.certifications && candidate.certifications.length > 0 && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center">
+                    <Medal className="h-5 w-5 mr-2 text-primary" />
+                    Certifications & Achievements
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {candidate.certifications.map((cert) => (
+                      <li key={cert} className="flex items-start">
+                        <CheckCircle2 className="h-4 w-4 mr-2 text-green-500 mt-0.5" />
+                        <span>{cert}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Project Experience */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <GanttChart className="h-5 w-5 mr-2 text-primary" />
+                  Project Experience
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="border-l-2 border-gray-200 pl-4 relative">
+                    <div className="absolute w-3 h-3 bg-primary rounded-full -left-[7px] top-1"></div>
+                    <h4 className="text-base font-medium">Senior Role</h4>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      {candidate.experienceYears > 5 ? "5+ years" : `${Math.max(1, candidate.experienceYears-2)}+ years`}
+                    </p>
+                    <p className="text-sm">
+                      Led cross-functional teams and delivered key projects in {candidate.skills.slice(0, 2).join(" and ")} technologies.
+                    </p>
+                  </div>
+
+                  <div className="border-l-2 border-gray-200 pl-4 relative">
+                    <div className="absolute w-3 h-3 bg-gray-400 rounded-full -left-[7px] top-1"></div>
+                    <h4 className="text-base font-medium">Earlier Experience</h4>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      {candidate.experienceYears > 3 ? "3+ years" : "1-2 years"}
+                    </p>
+                    <p className="text-sm">
+                      Developed expertise in {candidate.skills.slice(1, 3).join(", ")} and contributed to various projects.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Testimonials Section */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <Users className="h-5 w-5 mr-2 text-primary" />
+                  Testimonials
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="bg-muted/50 p-3 rounded-lg relative">
+                    <div className="absolute top-0 right-0 p-2 text-2xl text-muted-foreground">"</div>
+                    <p className="text-sm italic">
+                      A {candidate.experienceYears > 5 ? "seasoned" : "talented"} professional who consistently delivers high-quality work. Their expertise in {candidate.skills[0]} was particularly valuable to our project.
+                    </p>
+                    <p className="text-sm font-medium mt-2">— Previous Client</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
+      </div>
+
+      {/* Fixed footer with actions */}
+      <div className="sticky bottom-0 bg-white dark:bg-gray-950 pt-4 pb-4 border-t mt-6 flex justify-between items-center">
         <Button type="button" onClick={onClose} variant="outline">
           Close
         </Button>
-        {activeTab !== "express-interest" ? (
-          <Button onClick={() => setActiveTab("express-interest")}>
-            Express Interest
-          </Button>
-        ) : (
-          <Button variant="secondary" onClick={() => setActiveTab("overview")}>
+        
+        {showInterestForm ? (
+          <Button variant="secondary" onClick={() => setShowInterestForm(false)}>
             View Profile
           </Button>
+        ) : (
+          <Button onClick={() => setShowInterestForm(true)}>
+            Express Interest
+          </Button>
         )}
-      </DialogFooter>
-    </>
+      </div>
+    </div>
   );
 };
 
