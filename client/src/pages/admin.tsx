@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatExperienceYears } from "@/lib/utils";
+import { formatExperienceYears, formatDateTime } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { type Interest } from "@shared/schema";
 

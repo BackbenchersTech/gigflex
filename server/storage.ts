@@ -3,7 +3,7 @@ import {
   interests, Interest, InsertInterest
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, ilike, gte, and, or, inArray, sql } from "drizzle-orm";
+import { eq, ilike, gte, and, or, inArray, sql, desc } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -198,8 +198,26 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Interest operations
-  async getInterests(): Promise<Interest[]> {
-    return await db.select().from(interests);
+  async getInterests(): Promise<(Interest & { candidateName?: string })[]> {
+    // Join interests with candidates to get candidate names
+    const results = await db
+      .select({
+        interest: interests,
+        candidateName: candidates.fullName
+      })
+      .from(interests)
+      .leftJoin(candidates, eq(interests.candidateId, candidates.id))
+      .orderBy(desc(interests.createdAt));
+    
+    // Return the joined results
+    // Transform to handle null candidate names properly
+    return results.map(row => {
+      const interest = row.interest;
+      return {
+        ...interest,
+        candidateName: row.candidateName || `Candidate #${interest.candidateId}`
+      };
+    });
   }
 
   async getInterestById(id: number): Promise<Interest | undefined> {
