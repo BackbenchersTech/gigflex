@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { interestFormSchema, candidateFormSchema } from "@shared/schema";
 import { ZodError } from "zod";
+import { pool } from "./db";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // GET all candidates
@@ -67,14 +68,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Process skills field
       const skillsData = typeof req.body.skills === 'string' 
-        ? req.body.skills.split(',').map(s => s.trim()).filter(Boolean)
+        ? req.body.skills.split(',').map((s: string) => s.trim()).filter(Boolean)
         : (Array.isArray(req.body.skills) ? req.body.skills : existingCandidate.skills || []);
 
       // Process certifications field
       const certificationsData = req.body.certifications === undefined || req.body.certifications === ""
         ? []
         : (typeof req.body.certifications === 'string'
-            ? req.body.certifications.split(',').map(s => s.trim()).filter(Boolean)
+            ? req.body.certifications.split(',').map((s: string) => s.trim()).filter(Boolean)
             : (Array.isArray(req.body.certifications) 
                 ? req.body.certifications 
                 : existingCandidate.certifications || []));
@@ -87,51 +88,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Process isActive field
       const isActive = req.body.isActive === true || req.body.isActive === "true" || existingCandidate.isActive;
 
-      // Execute raw SQL update to bypass schema validation issues
-      await pool.query(
-        `UPDATE candidates 
-         SET initials = $1, 
-             profile_image_url = $2, 
-             full_name = $3, 
-             title = $4, 
-             location = $5, 
-             skills = $6, 
-             experience_years = $7, 
-             bio = $8, 
-             education = $9, 
-             availability = $10, 
-             contact_email = $11, 
-             contact_phone = $12, 
-             certifications = $13, 
-             is_active = $14
-         WHERE id = $15`,
-        [
-          req.body.initials || existingCandidate.initials,
-          req.body.profileImageUrl || existingCandidate.profileImageUrl,
-          req.body.fullName || existingCandidate.fullName,
-          req.body.title || existingCandidate.title,
-          req.body.location || existingCandidate.location,
-          skillsData,
-          experienceYearsData,
-          req.body.bio || existingCandidate.bio,
-          req.body.education || existingCandidate.education,
-          req.body.availability || existingCandidate.availability,
-          req.body.contactEmail || existingCandidate.contactEmail,
-          req.body.contactPhone || existingCandidate.contactPhone,
-          certificationsData,
-          isActive,
-          id
-        ]
-      );
+      // Execute update through storage interface to bypass schema validation issues
+      const updatedCandidate = await storage.updateCandidate(id, {
+        initials: req.body.initials || existingCandidate.initials,
+        profileImageUrl: req.body.profileImageUrl || existingCandidate.profileImageUrl,
+        fullName: req.body.fullName || existingCandidate.fullName,
+        title: req.body.title || existingCandidate.title,
+        location: req.body.location || existingCandidate.location,
+        skills: skillsData,
+        experienceYears: experienceYearsData,
+        bio: req.body.bio || existingCandidate.bio,
+        education: req.body.education || existingCandidate.education,
+        availability: req.body.availability || existingCandidate.availability,
+        contactEmail: req.body.contactEmail || existingCandidate.contactEmail,
+        contactPhone: req.body.contactPhone || existingCandidate.contactPhone,
+        certifications: certificationsData,
+        isActive: isActive
+      });
 
-      // Fetch the updated candidate
-      const updatedCandidate = await storage.getCandidateById(id);
       res.json(updatedCandidate);
     } catch (error) {
       console.error("Update candidate error:", error);
       res.status(500).json({ message: "Failed to update candidate" });
     }
-  }
   });
 
   // DELETE candidate
@@ -152,7 +131,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // GET search candidates
+  // GET search candidates - must come before /:id route to avoid conflicts
   app.get("/api/candidates/search", async (req, res) => {
     try {
       const query = req.query.q as string || "";

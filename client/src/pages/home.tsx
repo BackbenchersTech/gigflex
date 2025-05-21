@@ -12,7 +12,7 @@ const HomePage = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Query for searching candidates
-  const searchQuery1 = useQuery<Candidate[]>({
+  const candidatesQuery = useQuery<Candidate[]>({
     queryKey: ["/api/candidates/search", searchQuery],
     queryFn: async () => {
       if (!searchQuery.trim()) {
@@ -24,7 +24,7 @@ const HomePage = () => {
   });
   
   // Filter to active candidates only
-  const filteredCandidates = searchQuery1.data?.filter(candidate => candidate.isActive) || [];
+  const filteredCandidates = candidatesQuery.data?.filter(candidate => candidate.isActive) || [];
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -61,9 +61,9 @@ const HomePage = () => {
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto w-full space-y-6">
+        <div className="w-full max-w-6xl mx-auto">
           {hasActiveSearch && (
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-6">
               <div className="flex items-center">
                 <span className="text-sm font-medium mr-2">
                   {filteredCandidates.length} {filteredCandidates.length === 1 ? 'candidate' : 'candidates'} found
@@ -80,55 +80,56 @@ const HomePage = () => {
             </div>
           )}
 
-            {candidatesQuery.isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="space-y-4">
-                    <Skeleton className="h-16 w-16 rounded-full" />
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-5 w-1/2" />
-                    <Skeleton className="h-4 w-2/3" />
-                    <Skeleton className="h-4 w-1/2" />
-                    <div className="flex space-x-2 pt-2">
-                      <Skeleton className="h-6 w-20" />
-                      <Skeleton className="h-6 w-16" />
-                      <Skeleton className="h-6 w-12" />
-                    </div>
+          {candidatesQuery.isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="space-y-4">
+                  <Skeleton className="h-16 w-16 rounded-full" />
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-5 w-1/2" />
+                  <Skeleton className="h-4 w-2/3" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <div className="flex space-x-2 pt-2">
+                    <Skeleton className="h-6 w-20" />
+                    <Skeleton className="h-6 w-16" />
+                    <Skeleton className="h-6 w-12" />
                   </div>
-                ))}
-              </div>
-            ) : candidatesQuery.isError ? (
-              <div className="text-center py-12">
-                <p className="text-destructive text-lg">Error loading candidates.</p>
-                <Button 
-                  variant="outline" 
-                  onClick={() => candidatesQuery.refetch()}
-                  className="mt-4"
-                >
-                  Try Again
-                </Button>
-              </div>
-            ) : filteredCandidates.length === 0 ? (
-              <div className="text-center py-12 border rounded-lg bg-background">
-                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-                  <Users className="h-10 w-10 text-muted-foreground" />
                 </div>
-                <h3 className="mt-4 text-lg font-semibold">No candidates found</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Try adjusting your search or filter criteria.
-                </p>
-                <Button variant="outline" onClick={clearFilters} className="mt-4">
-                  Clear All Filters
+              ))}
+            </div>
+          ) : candidatesQuery.isError ? (
+            <div className="text-center py-12">
+              <p className="text-destructive text-lg">Error loading candidates.</p>
+              <Button 
+                variant="outline" 
+                onClick={() => candidatesQuery.refetch()}
+                className="mt-4"
+              >
+                Try Again
+              </Button>
+            </div>
+          ) : filteredCandidates.length === 0 ? (
+            <div className="text-center py-12 border rounded-lg bg-background">
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-muted">
+                <Search className="h-10 w-10 text-muted-foreground" />
+              </div>
+              <h3 className="mt-4 text-lg font-semibold">No candidates found</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Try adjusting your search criteria or using different keywords.
+              </p>
+              {searchQuery && (
+                <Button variant="outline" onClick={clearSearch} className="mt-4">
+                  Clear Search
                 </Button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredCandidates.map((candidate) => (
-                  <CandidateCard key={candidate.id} candidate={candidate} />
-                ))}
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredCandidates.map((candidate) => (
+                <CandidateCard key={candidate.id} candidate={candidate} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
