@@ -350,9 +350,14 @@ const CandidateForm = ({ candidate, onSuccess }: CandidateFormProps) => {
                         type="number" 
                         min={0} 
                         placeholder="Hourly bill rate" 
-                        {...field} 
-                        value={field.value || ''} 
-                        onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : null)} 
+                        value={field.value ?? ''} 
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value ? parseInt(value) : undefined);
+                        }}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
                       />
                     </FormControl>
                     <FormDescription>
@@ -374,9 +379,14 @@ const CandidateForm = ({ candidate, onSuccess }: CandidateFormProps) => {
                         type="number" 
                         min={0} 
                         placeholder="Hourly pay rate"
-                        {...field} 
-                        value={field.value || ''} 
-                        onChange={e => field.onChange(e.target.value ? parseInt(e.target.value) : null)} 
+                        value={field.value ?? ''} 
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value ? parseInt(value) : undefined);
+                        }}
+                        onBlur={field.onBlur}
+                        name={field.name}
+                        ref={field.ref}
                       />
                     </FormControl>
                     <FormDescription>
