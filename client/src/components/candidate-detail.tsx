@@ -39,7 +39,7 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto pr-2 pb-20">
+      <div className="flex-1 overflow-y-auto pr-2 pb-16">
         <DialogHeader className="text-left">
           <div className="flex items-center gap-4">
             <Avatar className="h-20 w-20 border-2 border-primary">
@@ -235,18 +235,17 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
         </div>
       </div>
 
-      {/* Fixed footer */}
-      <div className="sticky bottom-0 left-0 right-0 bg-slate-50 dark:bg-gray-900 border-t z-50 flex justify-between items-center px-4 py-3">
-        <Button type="button" onClick={onClose} variant="outline">
+      <div className="absolute inset-x-0 bottom-0 bg-slate-50 dark:bg-gray-900 border-t z-50 flex justify-between items-center h-14">
+        <Button type="button" onClick={onClose} variant="outline" className="ml-4">
           Close
         </Button>
         
         {showInterestForm ? (
-          <Button variant="secondary" onClick={() => setShowInterestForm(false)}>
+          <Button variant="secondary" onClick={() => setShowInterestForm(false)} className="mr-4">
             View Profile
           </Button>
         ) : (
-          <Button onClick={() => setShowInterestForm(true)}>
+          <Button onClick={() => setShowInterestForm(true)} className="mr-4">
             Express Interest
           </Button>
         )}
