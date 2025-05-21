@@ -1,96 +1,40 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import CandidateCard from "@/components/candidate-card";
 import SearchBar from "@/components/search-bar";
-import CandidateFilter from "@/components/candidate-filter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users } from "lucide-react";
+import { Users, Search } from "lucide-react";
 import type { Candidate } from "@shared/schema";
 
 const HomePage = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filters, setFilters] = useState({
-    skills: [] as string[],
-    experience: null as number | null,
-    availability: null as string | null
-  });
 
-  // Base query to get all candidates
-  const candidatesQuery = useQuery<Candidate[]>({
-    queryKey: ["/api/candidates"]
+  // Query for searching candidates
+  const searchQuery1 = useQuery<Candidate[]>({
+    queryKey: ["/api/candidates/search", searchQuery],
+    queryFn: async () => {
+      if (!searchQuery.trim()) {
+        return fetch("/api/candidates").then(res => res.json());
+      }
+      return fetch(`/api/candidates/search?q=${encodeURIComponent(searchQuery)}`).then(res => res.json());
+    },
+    enabled: true
   });
   
-  // Derive filtered candidates based on the base query, search and filters
-  const [filteredCandidates, setFilteredCandidates] = useState<Candidate[]>([]);
-  
-  useEffect(() => {
-    if (!candidatesQuery.data) return;
-    
-    let result = [...candidatesQuery.data].filter(c => c.isActive);
-    
-    // Apply search query
-    if (searchQuery) {
-      const lowerQuery = searchQuery.toLowerCase();
-      result = result.filter(candidate => 
-        candidate.fullName.toLowerCase().includes(lowerQuery) ||
-        candidate.title.toLowerCase().includes(lowerQuery) ||
-        candidate.location.toLowerCase().includes(lowerQuery) ||
-        candidate.skills.some(skill => skill.toLowerCase().includes(lowerQuery)) ||
-        candidate.bio.toLowerCase().includes(lowerQuery)
-      );
-    }
-    
-    // Apply skills filter
-    if (filters.skills.length > 0) {
-      result = result.filter(candidate => 
-        filters.skills.some(skill => candidate.skills.includes(skill))
-      );
-    }
-    
-    // Apply experience filter
-    if (filters.experience !== null) {
-      result = result.filter(candidate => 
-        candidate.experienceYears >= filters.experience!
-      );
-    }
-    
-    // Apply availability filter
-    if (filters.availability) {
-      result = result.filter(candidate => 
-        candidate.availability === filters.availability
-      );
-    }
-    
-    setFilteredCandidates(result);
-  }, [candidatesQuery.data, searchQuery, filters]);
+  // Filter to active candidates only
+  const filteredCandidates = searchQuery1.data?.filter(candidate => candidate.isActive) || [];
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   };
 
-  const handleFilter = (newFilters: {
-    skills: string[];
-    experience: number | null;
-    availability: string | null;
-  }) => {
-    setFilters(newFilters);
-  };
-
-  const clearFilters = () => {
+  const clearSearch = () => {
     setSearchQuery("");
-    setFilters({
-      skills: [],
-      experience: null,
-      availability: null
-    });
   };
 
-  const hasActiveFilters = searchQuery || 
-    filters.skills.length > 0 || 
-    filters.experience !== null || 
-    filters.availability !== null;
+  const hasActiveSearch = searchQuery.trim() !== "";
 
   return (
     <div className="container py-8">
@@ -105,32 +49,36 @@ const HomePage = () => {
         </div>
 
         <div className="max-w-3xl mx-auto w-full">
-          <SearchBar onSearch={handleSearch} initialValue={searchQuery} />
+          <div className="space-y-2">
+            <SearchBar 
+              onSearch={handleSearch} 
+              initialValue={searchQuery} 
+              placeholder="Try natural language search: 'React developer with 3+ years of experience'" 
+            />
+            <p className="text-sm text-muted-foreground text-center">
+              You can search by skills, experience level, and availability (e.g., "JavaScript developer with 5 years available immediately")
+            </p>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="md:col-span-1">
-            <CandidateFilter onFilter={handleFilter} />
-          </div>
-
-          <div className="md:col-span-3 space-y-6">
-            {hasActiveFilters && (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <span className="text-sm font-medium mr-2">
-                    {filteredCandidates.length} {filteredCandidates.length === 1 ? 'candidate' : 'candidates'} found
-                  </span>
-                  {searchQuery && (
-                    <Badge variant="secondary" className="mr-2">
-                      Search: {searchQuery}
-                    </Badge>
-                  )}
-                </div>
-                <Button variant="ghost" size="sm" onClick={clearFilters}>
-                  Clear filters
-                </Button>
+        <div className="max-w-6xl mx-auto w-full space-y-6">
+          {hasActiveSearch && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <span className="text-sm font-medium mr-2">
+                  {filteredCandidates.length} {filteredCandidates.length === 1 ? 'candidate' : 'candidates'} found
+                </span>
+                {searchQuery && (
+                  <Badge variant="secondary" className="mr-2">
+                    Search: {searchQuery}
+                  </Badge>
+                )}
               </div>
-            )}
+              <Button variant="ghost" size="sm" onClick={clearSearch}>
+                Clear search
+              </Button>
+            </div>
+          )}
 
             {candidatesQuery.isLoading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

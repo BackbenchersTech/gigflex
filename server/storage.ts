@@ -79,16 +79,73 @@ export class DatabaseStorage implements IStorage {
   async searchCandidates(query: string): Promise<Candidate[]> {
     if (!query) return this.getCandidates();
     
-    return await db.select().from(candidates).where(
-      or(
-        ilike(candidates.fullName, `%${query}%`),
-        ilike(candidates.title, `%${query}%`),
-        ilike(candidates.location, `%${query}%`),
-        ilike(candidates.bio, `%${query}%`)
-        // Note: Searching in array fields like skills requires more complex logic
-        // This is a simplified implementation
-      )
-    );
+    // Get all candidates so we can do advanced filtering in memory
+    const allCandidates = await this.getCandidates();
+    
+    // Extract potential years of experience from query
+    const experienceMatch = query.match(/(\d+)\s*(?:years?|yrs?)\s*(?:of\s*)?(?:experience|exp)/i);
+    const experienceYears = experienceMatch ? parseInt(experienceMatch[1]) : null;
+    
+    // Extract skills from the query (look for common programming languages and technologies)
+    const skills = [
+      'javascript', 'js', 'typescript', 'ts', 'react', 'angular', 'vue', 'node', 'express',
+      'python', 'django', 'flask', 'java', 'spring', 'c#', '.net', 'ruby', 'rails',
+      'php', 'laravel', 'go', 'golang', 'rust', 'swift', 'kotlin', 'flutter', 'dart',
+      'aws', 'azure', 'gcp', 'cloud', 'devops', 'docker', 'kubernetes', 'k8s',
+      'sql', 'mysql', 'postgresql', 'mongodb', 'nosql', 'graphql', 'rest', 'api',
+      'html', 'css', 'scss', 'sass', 'tailwind', 'bootstrap', 'ui', 'ux', 'design',
+      'mobile', 'ios', 'android', 'react native', 'lead', 'senior', 'junior', 'mid',
+      'fullstack', 'frontend', 'backend', 'data', 'ai', 'ml', 'machine learning'
+    ];
+    
+    // Create regex pattern for extracting mentioned skills
+    const skillPattern = new RegExp('\\b(' + skills.join('|') + ')\\b', 'gi');
+    const foundSkills = query.match(skillPattern) || [];
+    const normalizedSkills = [...new Set(foundSkills.map(s => s.toLowerCase()))];
+    
+    // Extract availability from query
+    const availabilityMatch = query.match(/\b(immediate|immediately|(\d+)\s*(?:week|wk|day|month|mth)s?)\b/i);
+    const availabilityTerm = availabilityMatch ? availabilityMatch[0].toLowerCase() : null;
+    
+    // Filter candidates based on all extracted criteria
+    return allCandidates.filter(candidate => {
+      // Basic text match
+      const basicMatch = 
+        candidate.fullName.toLowerCase().includes(query.toLowerCase()) ||
+        candidate.title.toLowerCase().includes(query.toLowerCase()) ||
+        candidate.location.toLowerCase().includes(query.toLowerCase()) ||
+        candidate.bio.toLowerCase().includes(query.toLowerCase()) ||
+        candidate.skills.some(skill => query.toLowerCase().includes(skill.toLowerCase()));
+        
+      // Match by extracted skills
+      const skillsMatch = normalizedSkills.length === 0 || 
+        normalizedSkills.some(skill => 
+          candidate.skills.some(candidateSkill => 
+            candidateSkill.toLowerCase().includes(skill)
+          )
+        );
+        
+      // Match by experience years
+      const experienceMatch = experienceYears === null || 
+        candidate.experienceYears >= experienceYears;
+        
+      // Match by availability
+      const availabilityMatch = !availabilityTerm || 
+        candidate.availability.toLowerCase().includes(availabilityTerm);
+        
+      // If any skills, experience, or availability were mentioned in the query,
+      // require those criteria to match
+      const hasSpecificCriteria = normalizedSkills.length > 0 || 
+        experienceYears !== null || 
+        availabilityTerm !== null;
+        
+      if (hasSpecificCriteria) {
+        return skillsMatch && experienceMatch && availabilityMatch;
+      }
+      
+      // Otherwise, use basic text matching
+      return basicMatch;
+    });
   }
 
   async filterCandidates(
