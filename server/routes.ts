@@ -6,6 +6,34 @@ import { ZodError } from "zod";
 import { pool } from "./db";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Routes for natural language search and filtering
+  // Important: Order matters - specific routes must come before parametrized routes
+  
+  // GET search candidates - natural language search
+  app.get("/api/candidates/search", async (req, res) => {
+    try {
+      const query = req.query.q as string || "";
+      const candidates = await storage.searchCandidates(query);
+      res.json(candidates);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to search candidates" });
+    }
+  });
+
+  // GET filter candidates - for future compatibility, but we're using natural language now
+  app.get("/api/candidates/filter", async (req, res) => {
+    try {
+      const skills = req.query.skills ? (req.query.skills as string).split(",") : undefined;
+      const experienceYears = req.query.experience ? parseInt(req.query.experience as string) : undefined;
+      const availability = req.query.availability as string | undefined;
+
+      const candidates = await storage.filterCandidates(skills, experienceYears, availability);
+      res.json(candidates);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to filter candidates" });
+    }
+  });
+
   // GET all candidates
   app.get("/api/candidates", async (req, res) => {
     try {
@@ -51,7 +79,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // PUT update candidate (simplified for direct DB access)
+  // PUT update candidate
   app.put("/api/candidates/:id", async (req, res) => {
     try {
       // Parse ID and verify
@@ -88,7 +116,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Process isActive field
       const isActive = req.body.isActive === true || req.body.isActive === "true" || existingCandidate.isActive;
 
-      // Execute update through storage interface to bypass schema validation issues
+      // Execute update through storage interface
       const updatedCandidate = await storage.updateCandidate(id, {
         initials: req.body.initials || existingCandidate.initials,
         profileImageUrl: req.body.profileImageUrl || existingCandidate.profileImageUrl,
@@ -131,28 +159,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // GET search candidates - must come before /:id route to avoid conflicts
-  app.get("/api/candidates/search", async (req, res) => {
+  // GET interests by candidate
+  app.get("/api/candidates/:id/interests", async (req, res) => {
     try {
-      const query = req.query.q as string || "";
-      const candidates = await storage.searchCandidates(query);
-      res.json(candidates);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to search candidates" });
-    }
-  });
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid candidate ID" });
+      }
 
-  // GET filter candidates
-  app.get("/api/candidates/filter", async (req, res) => {
-    try {
-      const skills = req.query.skills ? (req.query.skills as string).split(",") : undefined;
-      const experienceYears = req.query.experience ? parseInt(req.query.experience as string) : undefined;
-      const availability = req.query.availability as string | undefined;
-
-      const candidates = await storage.filterCandidates(skills, experienceYears, availability);
-      res.json(candidates);
+      const interests = await storage.getInterestsByCandidate(id);
+      res.json(interests);
     } catch (error) {
-      res.status(500).json({ message: "Failed to filter candidates" });
+      res.status(500).json({ message: "Failed to fetch interests" });
     }
   });
 
@@ -177,21 +195,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/interests", async (req, res) => {
     try {
       const interests = await storage.getInterests();
-      res.json(interests);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch interests" });
-    }
-  });
-
-  // GET interests by candidate
-  app.get("/api/candidates/:id/interests", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid candidate ID" });
-      }
-
-      const interests = await storage.getInterestsByCandidate(id);
       res.json(interests);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch interests" });

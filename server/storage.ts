@@ -77,16 +77,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async searchCandidates(query: string): Promise<Candidate[]> {
-    if (!query) return this.getCandidates();
-    
-    // Get all candidates so we can do advanced filtering in memory
-    const allCandidates = await this.getCandidates();
+    if (!query || !query.trim()) {
+      // Return all active candidates if no query
+      return db.select().from(candidates).where(eq(candidates.isActive, true));
+    }
     
     // Extract potential years of experience from query
-    const experienceMatch = query.match(/(\d+)\s*(?:years?|yrs?)\s*(?:of\s*)?(?:experience|exp)/i);
-    const experienceYears = experienceMatch ? parseInt(experienceMatch[1]) : null;
+    // Match patterns like "5 years", "3+ years", "over 2 years of experience"
+    const experienceMatch = query.match(/(\d+)\s*(?:\+)?\s*(?:years?|yrs?)\s*(?:of\s*)?(?:experience|exp)?|\b(?:over|more\s+than)\s+(\d+)\s*(?:years?|yrs?)/i);
+    const experienceYears = experienceMatch ? parseInt(experienceMatch[1] || experienceMatch[2]) : null;
     
-    // Extract skills from the query (look for common programming languages and technologies)
+    // Extract skills from the query (common programming languages and technologies)
     const skills = [
       'javascript', 'js', 'typescript', 'ts', 'react', 'angular', 'vue', 'node', 'express',
       'python', 'django', 'flask', 'java', 'spring', 'c#', '.net', 'ruby', 'rails',
@@ -98,54 +99,63 @@ export class DatabaseStorage implements IStorage {
       'fullstack', 'frontend', 'backend', 'data', 'ai', 'ml', 'machine learning'
     ];
     
-    // Create regex pattern for extracting mentioned skills
-    const skillPattern = new RegExp('\\b(' + skills.join('|') + ')\\b', 'gi');
-    const foundSkills = query.match(skillPattern) || [];
-    const normalizedSkills = [...new Set(foundSkills.map(s => s.toLowerCase()))];
-    
-    // Extract availability from query
-    const availabilityMatch = query.match(/\b(immediate|immediately|(\d+)\s*(?:week|wk|day|month|mth)s?)\b/i);
+    // Extract availability from query (immediate, x weeks, etc.)
+    const availabilityMatch = query.match(/\b(immediate|immediately|available\s+now|(\d+)\s*(?:week|wk|day|month|mth)s?)(?:\s+availability)?\b/i);
     const availabilityTerm = availabilityMatch ? availabilityMatch[0].toLowerCase() : null;
     
-    // Filter candidates based on all extracted criteria
+    // Convert the skills array to a regex-safe pattern
+    const skillsPattern = skills.map(s => s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')).join('|');
+    const skillRegex = new RegExp(`\\b(${skillsPattern})\\b`, 'gi');
+    const foundSkills = query.match(skillRegex) || [];
+    
+    // Normalize and deduplicate skills
+    const lowerCaseSkills = foundSkills.map(s => s.toLowerCase());
+    const normalizedSkills = lowerCaseSkills.filter((skill, index) => 
+      lowerCaseSkills.indexOf(skill) === index
+    );
+    
+    // We'll use a simpler approach for natural language search by doing in-memory filtering
+    // This is more reliable and flexible for complex queries
+    const allCandidates = await this.getCandidates();
+    
     return allCandidates.filter(candidate => {
-      // Basic text match
-      const basicMatch = 
-        candidate.fullName.toLowerCase().includes(query.toLowerCase()) ||
-        candidate.title.toLowerCase().includes(query.toLowerCase()) ||
-        candidate.location.toLowerCase().includes(query.toLowerCase()) ||
-        candidate.bio.toLowerCase().includes(query.toLowerCase()) ||
-        candidate.skills.some(skill => query.toLowerCase().includes(skill.toLowerCase()));
-        
-      // Match by extracted skills
-      const skillsMatch = normalizedSkills.length === 0 || 
-        normalizedSkills.some(skill => 
-          candidate.skills.some(candidateSkill => 
-            candidateSkill.toLowerCase().includes(skill)
-          )
-        );
-        
-      // Match by experience years
-      const experienceMatch = experienceYears === null || 
-        candidate.experienceYears >= experienceYears;
-        
-      // Match by availability
-      const availabilityMatch = !availabilityTerm || 
-        candidate.availability.toLowerCase().includes(availabilityTerm);
-        
-      // If any skills, experience, or availability were mentioned in the query,
-      // require those criteria to match
-      const hasSpecificCriteria = normalizedSkills.length > 0 || 
-        experienceYears !== null || 
-        availabilityTerm !== null;
-        
-      if (hasSpecificCriteria) {
-        return skillsMatch && experienceMatch && availabilityMatch;
-      }
+      // Only show active candidates
+      if (!candidate.isActive) return false;
       
-      // Otherwise, use basic text matching
-      return basicMatch;
+      // If we have specific extracted criteria, apply those filters
+      if (normalizedSkills.length > 0 || experienceYears !== null || availabilityTerm !== null) {
+        // Match by skills (any of the detected skills should be present)
+        const skillsMatch = normalizedSkills.length === 0 || 
+          normalizedSkills.some(querySkill => 
+            candidate.skills.some(candidateSkill => 
+              candidateSkill.toLowerCase().includes(querySkill)
+            )
+          );
+          
+        // Match by experience years
+        const experienceMatch = experienceYears === null || 
+          candidate.experienceYears >= experienceYears;
+          
+        // Match by availability
+        const availabilityMatch = !availabilityTerm || 
+          candidate.availability.toLowerCase().includes(availabilityTerm);
+          
+        return skillsMatch && experienceMatch && availabilityMatch;
+      } else {
+        // Otherwise do a basic text search across all relevant fields
+        const searchLower = query.toLowerCase();
+        
+        return (
+          candidate.fullName.toLowerCase().includes(searchLower) ||
+          candidate.title.toLowerCase().includes(searchLower) ||
+          candidate.location.toLowerCase().includes(searchLower) ||
+          candidate.bio.toLowerCase().includes(searchLower) ||
+          candidate.education.toLowerCase().includes(searchLower) ||
+          candidate.skills.some(skill => skill.toLowerCase().includes(searchLower))
+        );
+      }
     });
+  }
   }
 
   async filterCandidates(
