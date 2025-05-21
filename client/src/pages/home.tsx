@@ -37,7 +37,7 @@ const HomePage = () => {
   const hasActiveSearch = searchQuery.trim() !== "";
 
   return (
-    <div className="container py-8">
+    <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col space-y-6">
         <div className="text-center max-w-3xl mx-auto">
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
@@ -61,7 +61,7 @@ const HomePage = () => {
           </div>
         </div>
 
-        <div className="w-full max-w-6xl mx-auto">
+        <div className="w-full max-w-6xl mx-auto px-4">
           {hasActiveSearch && (
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center">
