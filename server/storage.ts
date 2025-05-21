@@ -139,7 +139,12 @@ export class DatabaseStorage implements IStorage {
         return skillsMatch && experienceMatch && availabilityMatch;
       } else {
         // Basic text search across all relevant fields
-        const searchLower = query.toLowerCase();
+        const searchLower = query.toLowerCase().trim();
+        
+        // Check if any of the candidate's skills match the search query
+        const skillsMatch = candidate.skills.some(skill => 
+          skill.toLowerCase().includes(searchLower)
+        );
         
         return (
           candidate.fullName.toLowerCase().includes(searchLower) ||
@@ -147,7 +152,7 @@ export class DatabaseStorage implements IStorage {
           candidate.location.toLowerCase().includes(searchLower) ||
           candidate.bio.toLowerCase().includes(searchLower) ||
           candidate.education.toLowerCase().includes(searchLower) ||
-          candidate.skills.some(skill => skill.toLowerCase().includes(searchLower))
+          skillsMatch
         );
       }
     });
