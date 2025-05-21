@@ -38,7 +38,7 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
   const [showInterestForm, setShowInterestForm] = useState(false);
 
   return (
-    <div className="relative pb-20">
+    <div className="relative pb-16">
       <DialogHeader className="text-left">
         <div className="flex items-center gap-4">
           <Avatar className="h-20 w-20 border-2 border-primary">
@@ -234,7 +234,7 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
       </div>
 
       {/* Fixed footer with actions */}
-      <div className="sticky bottom-0 left-0 right-0 bg-white dark:bg-gray-950 border-t mt-6 flex justify-between items-center px-4 py-3">
+      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-950 border-t flex justify-between items-center px-6 py-4 shadow-md">
         <Button type="button" onClick={onClose} variant="outline">
           Close
         </Button>
