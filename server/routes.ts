@@ -116,6 +116,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Process isActive field
       const isActive = req.body.isActive === true || req.body.isActive === "true" || existingCandidate.isActive;
 
+      // Process bill rate and pay rate fields
+      const billRate = req.body.billRate !== undefined 
+        ? (typeof req.body.billRate === 'string' 
+            ? parseInt(req.body.billRate) 
+            : req.body.billRate) 
+        : existingCandidate.billRate;
+        
+      const payRate = req.body.payRate !== undefined 
+        ? (typeof req.body.payRate === 'string' 
+            ? parseInt(req.body.payRate) 
+            : req.body.payRate) 
+        : existingCandidate.payRate;
+      
       // Execute update through storage interface
       const updatedCandidate = await storage.updateCandidate(id, {
         initials: req.body.initials || existingCandidate.initials,
@@ -131,6 +144,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         contactEmail: req.body.contactEmail || existingCandidate.contactEmail,
         contactPhone: req.body.contactPhone || existingCandidate.contactPhone,
         certifications: certificationsData,
+        billRate: billRate,
+        payRate: payRate,
         isActive: isActive
       });
 
