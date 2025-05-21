@@ -235,8 +235,8 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
         </div>
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 bg-slate-50 dark:bg-gray-900 border-t z-50 flex justify-end items-center h-14">
-        <div className="flex space-x-2 mr-4">
+      <DialogFooter className="flex justify-end bg-slate-50 dark:bg-gray-900 border-t p-0 h-14 sticky bottom-0 left-0 right-0">
+        <div className="flex items-center space-x-2 mr-4 h-full">
           <Button type="button" onClick={onClose} variant="outline">
             Close
           </Button>
@@ -251,7 +251,7 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
             </Button>
           )}
         </div>
-      </div>
+      </DialogFooter>
     </div>
   );
 };
