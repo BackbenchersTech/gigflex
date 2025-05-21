@@ -50,7 +50,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // PUT update candidate - simplified direct approach
+  // PUT update candidate (simplified for direct DB access)
   app.put("/api/candidates/:id", async (req, res) => {
     try {
       // Parse ID and verify
@@ -65,42 +65,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Candidate not found" });
       }
 
-      // Handle skills data (both string and array forms)
-      let skillsData;
-      if (typeof req.body.skills === 'string') {
-        skillsData = req.body.skills.split(',').map(s => s.trim()).filter(Boolean);
-        if (skillsData.length === 0) skillsData = ["None"];
-      } else if (Array.isArray(req.body.skills)) {
-        skillsData = req.body.skills;
-      } else {
-        skillsData = existingCandidate.skills; // Keep existing if not provided
-      }
+      // Process skills field
+      const skillsData = typeof req.body.skills === 'string' 
+        ? req.body.skills.split(',').map(s => s.trim()).filter(Boolean)
+        : (Array.isArray(req.body.skills) ? req.body.skills : existingCandidate.skills || []);
 
-      // Handle certifications data (both string and array forms)
-      let certificationsData;
-      if (req.body.certifications === undefined || req.body.certifications === "") {
-        certificationsData = [];
-      } else if (typeof req.body.certifications === 'string') {
-        certificationsData = req.body.certifications.split(',').map(s => s.trim()).filter(Boolean);
-      } else if (Array.isArray(req.body.certifications)) {
-        certificationsData = req.body.certifications;
-      } else {
-        certificationsData = existingCandidate.certifications || []; // Keep existing if not provided
-      }
+      // Process certifications field
+      const certificationsData = req.body.certifications === undefined || req.body.certifications === ""
+        ? []
+        : (typeof req.body.certifications === 'string'
+            ? req.body.certifications.split(',').map(s => s.trim()).filter(Boolean)
+            : (Array.isArray(req.body.certifications) 
+                ? req.body.certifications 
+                : existingCandidate.certifications || []));
 
-      // Handle experience years (as string or number)
-      let experienceYearsData;
-      if (typeof req.body.experienceYears === 'string') {
-        experienceYearsData = parseInt(req.body.experienceYears);
-      } else {
-        experienceYearsData = req.body.experienceYears;
-      }
+      // Process experience years field
+      const experienceYearsData = typeof req.body.experienceYears === 'string'
+        ? parseInt(req.body.experienceYears)
+        : req.body.experienceYears || existingCandidate.experienceYears;
 
-      // Boolean conversion for isActive
-      let isActiveData = req.body.isActive === true || req.body.isActive === "true";
+      // Process isActive field
+      const isActive = req.body.isActive === true || req.body.isActive === "true" || existingCandidate.isActive;
 
-      // Direct update with raw SQL to bypass Zod validation
-      const result = await db.query(
+      // Execute raw SQL update to bypass schema validation issues
+      await pool.query(
         `UPDATE candidates 
          SET initials = $1, 
              profile_image_url = $2, 
@@ -116,8 +104,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
              contact_phone = $12, 
              certifications = $13, 
              is_active = $14
-         WHERE id = $15
-         RETURNING *`,
+         WHERE id = $15`,
         [
           req.body.initials || existingCandidate.initials,
           req.body.profileImageUrl || existingCandidate.profileImageUrl,
@@ -125,23 +112,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           req.body.title || existingCandidate.title,
           req.body.location || existingCandidate.location,
           skillsData,
-          experienceYearsData || existingCandidate.experienceYears,
+          experienceYearsData,
           req.body.bio || existingCandidate.bio,
           req.body.education || existingCandidate.education,
           req.body.availability || existingCandidate.availability,
           req.body.contactEmail || existingCandidate.contactEmail,
           req.body.contactPhone || existingCandidate.contactPhone,
           certificationsData,
-          isActiveData,
+          isActive,
           id
         ]
       );
 
-      if (result.rowCount === 0) {
-        return res.status(404).json({ message: "Candidate not found" });
-      }
-      
-      res.json(result.rows[0]);
+      // Fetch the updated candidate
+      const updatedCandidate = await storage.getCandidateById(id);
+      res.json(updatedCandidate);
     } catch (error) {
       console.error("Update candidate error:", error);
       res.status(500).json({ message: "Failed to update candidate" });
