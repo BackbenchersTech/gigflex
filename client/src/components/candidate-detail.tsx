@@ -234,7 +234,7 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
       </div>
 
       {/* Fixed footer with actions */}
-      <div className="sticky bottom-0 bg-white dark:bg-gray-950 pt-4 pb-4 border-t mt-6 flex justify-between items-center">
+      <div className="sticky bottom-0 left-0 right-0 bg-white dark:bg-gray-950 border-t mt-6 flex justify-between items-center px-4 py-3">
         <Button type="button" onClick={onClose} variant="outline">
           Close
         </Button>
