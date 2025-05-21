@@ -114,7 +114,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         : req.body.experienceYears || existingCandidate.experienceYears;
 
       // Process isActive field
-      const isActive = req.body.isActive === true || req.body.isActive === "true" || existingCandidate.isActive;
+      const isActive = req.body.isActive !== undefined 
+        ? (req.body.isActive === true || req.body.isActive === "true") 
+        : existingCandidate.isActive;
 
       // Process bill rate and pay rate fields
       const billRate = req.body.billRate !== undefined 
