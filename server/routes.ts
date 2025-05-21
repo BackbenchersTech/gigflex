@@ -58,13 +58,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid candidate ID" });
       }
 
-      const candidateData = candidateFormSchema.parse(req.body);
-      const updatedCandidate = await storage.updateCandidate(id, candidateData);
+      // Parse data through the form schema which will properly transform skills and certifications
+      const formData = candidateFormSchema.parse(req.body);
+      
+      // Log for debugging
+      console.log("Parsed candidate data:", JSON.stringify(formData));
+      
+      const updatedCandidate = await storage.updateCandidate(id, formData);
       if (!updatedCandidate) {
         return res.status(404).json({ message: "Candidate not found" });
       }
       res.json(updatedCandidate);
     } catch (error) {
+      console.error("Update candidate error:", error);
       if (error instanceof ZodError) {
         return res.status(400).json({ 
           message: "Invalid candidate data", 

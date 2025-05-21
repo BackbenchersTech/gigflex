@@ -54,8 +54,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateCandidate(id: number, candidateData: Partial<InsertCandidate>): Promise<Candidate | undefined> {
+    // Process the candidate data to handle nulls and optional fields
+    const updateData = {
+      ...candidateData,
+      profileImageUrl: candidateData.profileImageUrl || null,
+      contactEmail: candidateData.contactEmail || null,
+      contactPhone: candidateData.contactPhone || null,
+      certifications: candidateData.certifications || null
+    };
+    
     const result = await db.update(candidates)
-      .set(candidateData)
+      .set(updateData)
       .where(eq(candidates.id, id))
       .returning();
     
@@ -91,9 +100,13 @@ export class DatabaseStorage implements IStorage {
     
     // Add filters based on parameters
     if (skills && skills.length > 0) {
-      // This is a simplified approach. For exact array matching,
-      // you might need to use database-specific functions
-      conditions.push(inArray(candidates.skills, skills));
+      // For each skill, check if it's in the skills array
+      const skillConditions = skills.map(skill => 
+        sql`${candidates.skills} @> ARRAY[${skill}]::text[]`
+      );
+      if (skillConditions.length > 0) {
+        conditions.push(or(...skillConditions));
+      }
     }
     
     if (experienceYears !== undefined) {
