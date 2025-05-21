@@ -94,14 +94,14 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
           ) : (
             <>
               {/* Bio Section */}
-              <Card>
-                <CardHeader className="pb-2 pl-4">
+              <Card className="overflow-hidden">
+                <CardHeader className="pb-1 pl-4 pt-4">
                   <CardTitle className="text-lg flex items-center">
                     <BookOpen className="h-5 w-5 mr-2 text-primary" />
                     Professional Summary
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pl-6">
                   <p className="text-muted-foreground">
                     {candidate.bio || "Experienced professional with a proven track record in the industry."}
                   </p>
@@ -109,14 +109,14 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
               </Card>
 
               {/* Skills Section */}
-              <Card>
-                <CardHeader className="pb-2 pl-4">
+              <Card className="overflow-hidden">
+                <CardHeader className="pb-1 pl-4 pt-4">
                   <CardTitle className="text-lg flex items-center">
                     <Star className="h-5 w-5 mr-2 text-primary" />
                     Skills
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pl-6">
                   <div className="flex flex-wrap gap-2">
                     {candidate.skills.map((skill) => (
                       <Badge key={skill} variant="secondary" className="bg-slate-100 text-slate-800 hover:bg-slate-200 rounded-md text-xs font-normal">
@@ -128,14 +128,14 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
               </Card>
 
               {/* Professional Details */}
-              <Card>
-                <CardHeader className="pb-2 pl-4">
+              <Card className="overflow-hidden">
+                <CardHeader className="pb-1 pl-4 pt-4">
                   <CardTitle className="text-lg flex items-center">
                     <Briefcase className="h-5 w-5 mr-2 text-primary" />
                     Professional Details
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="pl-6 space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <p className="text-sm text-muted-foreground">Industry Experience</p>
@@ -155,14 +155,14 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
 
               {/* Certifications */}
               {candidate.certifications && candidate.certifications.length > 0 && (
-                <Card>
-                  <CardHeader className="pb-2 pl-4">
+                <Card className="overflow-hidden">
+                  <CardHeader className="pb-1 pl-4 pt-4">
                     <CardTitle className="text-lg flex items-center">
                       <Medal className="h-5 w-5 mr-2 text-primary" />
                       Certifications & Achievements
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="pl-6">
                     <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       {candidate.certifications.map((cert) => (
                         <li key={cert} className="flex items-start">
@@ -176,14 +176,14 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
               )}
 
               {/* Project Experience */}
-              <Card>
-                <CardHeader className="pb-2 pl-4">
+              <Card className="overflow-hidden">
+                <CardHeader className="pb-1 pl-4 pt-4">
                   <CardTitle className="text-lg flex items-center">
                     <GanttChart className="h-5 w-5 mr-2 text-primary" />
                     Project Experience
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pl-6">
                   <div className="space-y-4">
                     <div className="border-l-2 border-gray-200 pl-4 relative">
                       <div className="absolute w-3 h-3 bg-primary rounded-full -left-[7px] top-1"></div>
@@ -211,14 +211,14 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
               </Card>
 
               {/* Testimonials Section */}
-              <Card>
-                <CardHeader className="pb-2 pl-4">
+              <Card className="overflow-hidden">
+                <CardHeader className="pb-1 pl-4 pt-4">
                   <CardTitle className="text-lg flex items-center">
                     <Users className="h-5 w-5 mr-2 text-primary" />
                     Testimonials
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pl-6">
                   <div className="space-y-4">
                     <div className="bg-muted/50 p-3 rounded-lg relative">
                       <div className="absolute top-0 right-0 p-2 text-2xl text-muted-foreground">"</div>
