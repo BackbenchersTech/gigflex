@@ -17,7 +17,7 @@ const AdminPage = () => {
   });
 
   return (
-    <div className="container py-8">
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
       <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
