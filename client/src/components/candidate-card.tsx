@@ -45,14 +45,14 @@ const CandidateCard = ({ candidate }: CandidateCardProps) => {
                   )}
                 </Avatar>
                 <div className="ml-3">
-                  <h3 className="text-xl font-semibold">{candidate.initials}</h3>
+                  <h3 className="text-lg font-semibold">{candidate.initials}</h3>
                 </div>
               </div>
-              <Badge variant="outline" className="uppercase">
+              <Badge variant="outline" className="uppercase text-xs">
                 {candidate.availability}
               </Badge>
             </div>
-            <p className="text-lg text-muted-foreground">{candidate.title}</p>
+            <p className="text-base text-muted-foreground">{candidate.title}</p>
             
             <div className="flex items-center text-sm text-muted-foreground mt-2">
               <MapPin className="h-4 w-4 mr-2" />
