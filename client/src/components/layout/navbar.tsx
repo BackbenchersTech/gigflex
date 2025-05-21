@@ -9,7 +9,6 @@ import { useTheme } from "@/components/ui/theme-provider";
 import { 
   Menu, 
   Search, 
-  Users, 
   Moon, 
   Sun, 
   User 
@@ -24,8 +23,11 @@ const Navbar = () => {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center space-x-2">
-            <Users className="h-6 w-6 text-primary" />
-            <span className="font-bold text-xl">TalentShowcase</span>
+            <img 
+              src="/gigflex-logo.png" 
+              alt="GigFlex" 
+              className="h-8" 
+            />
           </Link>
           
           <nav className="hidden md:flex items-center space-x-6">
