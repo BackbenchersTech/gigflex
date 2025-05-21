@@ -47,28 +47,9 @@ export const insertInterestSchema = createInsertSchema(interests).omit({
 });
 
 // Extended schemas for form validation
-export const candidateFormSchema = z.object({
-  initials: z.string().min(1).max(3),
-  profileImageUrl: z.string().optional(),
-  fullName: z.string().min(1),
-  title: z.string().min(1),
-  location: z.string().min(1),
-  skills: z.string().transform(val => {
-    const skillArray = val.split(',').map(s => s.trim()).filter(Boolean);
-    return skillArray.length > 0 ? skillArray : ["None"]; // Ensure we have at least one value
-  }),
-  experienceYears: z.number().min(0),
-  bio: z.string().min(1),
-  education: z.string().min(1),
-  availability: z.string().min(1),
-  contactEmail: z.string().email().optional().or(z.literal('')),
-  contactPhone: z.string().optional().or(z.literal('')),
-  certifications: z.string().optional().transform(val => {
-    if (!val) return [];
-    const certArray = val.split(',').map(s => s.trim()).filter(Boolean);
-    return certArray.length > 0 ? certArray : [];
-  }),
-  isActive: z.boolean().default(true),
+export const candidateFormSchema = insertCandidateSchema.extend({
+  skills: z.string().transform(val => val.split(',').map(s => s.trim()).filter(Boolean)),
+  certifications: z.string().optional().transform(val => val ? val.split(',').map(s => s.trim()) : []),
 });
 
 export const interestFormSchema = insertInterestSchema.extend({

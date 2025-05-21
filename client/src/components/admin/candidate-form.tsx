@@ -44,14 +44,16 @@ const CandidateForm = ({ candidate, onSuccess }: CandidateFormProps) => {
       fullName: candidate?.fullName || "",
       title: candidate?.title || "",
       location: candidate?.location || "",
-      skills: candidate?.skills.join(", ") || "",
+      skills: candidate?.skills ? candidate.skills.join(", ") : "",
       experienceYears: candidate?.experienceYears || 0,
       bio: candidate?.bio || "",
       education: candidate?.education || "",
       availability: candidate?.availability || "Immediate",
       contactEmail: candidate?.contactEmail || "",
       contactPhone: candidate?.contactPhone || "",
-      certifications: candidate?.certifications?.join(", ") || "",
+      certifications: candidate?.certifications && candidate.certifications.length > 0 
+        ? candidate.certifications.join(", ") 
+        : "",
       isActive: candidate?.isActive ?? true,
     },
   });

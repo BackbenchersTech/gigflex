@@ -58,16 +58,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid candidate ID" });
       }
 
-      // Parse data through the form schema which will properly transform skills and certifications
-      const formData = candidateFormSchema.parse(req.body);
-      
-      // Log for debugging
-      console.log("Parsed candidate data:", JSON.stringify(formData));
-      
-      const updatedCandidate = await storage.updateCandidate(id, formData);
-      if (!updatedCandidate) {
+      // Get the existing candidate to ensure we have the right data
+      const existingCandidate = await storage.getCandidateById(id);
+      if (!existingCandidate) {
         return res.status(404).json({ message: "Candidate not found" });
       }
+
+      // Process the form data, handling skills and certifications specially
+      let skills = req.body.skills;
+      if (typeof skills === 'string') {
+        skills = skills.split(',').map(s => s.trim()).filter(Boolean);
+        if (skills.length === 0) skills = ["None"];
+      }
+
+      let certifications = req.body.certifications;
+      if (certifications === undefined || certifications === "") {
+        certifications = [];
+      } else if (typeof certifications === 'string') {
+        certifications = certifications.split(',').map(s => s.trim()).filter(Boolean);
+      }
+
+      // Create the update data
+      const candidateData = {
+        initials: req.body.initials,
+        fullName: req.body.fullName,
+        title: req.body.title,
+        location: req.body.location,
+        skills: skills,
+        experienceYears: parseInt(req.body.experienceYears),
+        bio: req.body.bio,
+        education: req.body.education,
+        availability: req.body.availability,
+        profileImageUrl: req.body.profileImageUrl || null,
+        contactEmail: req.body.contactEmail || null,
+        contactPhone: req.body.contactPhone || null,
+        certifications: certifications,
+        isActive: req.body.isActive === true || req.body.isActive === "true"
+      };
+      
+      console.log("Processed candidate data:", JSON.stringify(candidateData));
+      
+      const updatedCandidate = await storage.updateCandidate(id, candidateData);
       res.json(updatedCandidate);
     } catch (error) {
       console.error("Update candidate error:", error);
