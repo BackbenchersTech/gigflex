@@ -223,9 +223,6 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-// Initialize the storage
-export const storage = new DatabaseStorage();
-
 // Seed function (run at startup)
 async function seedDatabase() {
   const count = await db.select().from(candidates);
@@ -375,7 +372,7 @@ async function seedDatabase() {
   }
 }
 
-// Initialize the storage
+// Initialize storage and export the instance for use in the application
 export const storage = new DatabaseStorage();
 
 // Seed the database with initial data (this runs when the server starts)

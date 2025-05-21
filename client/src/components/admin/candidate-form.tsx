@@ -51,9 +51,7 @@ const CandidateForm = ({ candidate, onSuccess }: CandidateFormProps) => {
       availability: candidate?.availability || "Immediate",
       contactEmail: candidate?.contactEmail || "",
       contactPhone: candidate?.contactPhone || "",
-      certifications: candidate?.certifications && candidate.certifications.length > 0 
-        ? candidate.certifications.join(", ") 
-        : "",
+      certifications: candidate?.certifications || [],
       isActive: candidate?.isActive ?? true,
     },
   });
