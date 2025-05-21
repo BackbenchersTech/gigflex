@@ -205,27 +205,6 @@ const CandidateList = () => {
         </div>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search candidates..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10"
-        />
-        {searchQuery && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-2 top-2 h-5 w-5"
-            onClick={() => setSearchQuery("")}
-          >
-            <X className="h-4 w-4" />
-            <span className="sr-only">Clear search</span>
-          </Button>
-        )}
-      </div>
-
       {isLoading ? (
         <div className="text-center py-4">Loading candidates...</div>
       ) : error ? (
