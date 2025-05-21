@@ -58,6 +58,7 @@ const CandidateList = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
+  const [showInactive, setShowInactive] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
   const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
@@ -66,9 +67,16 @@ const CandidateList = () => {
   const { data: candidates = [], isLoading, error } = useQuery({
     queryKey: ["/api/candidates"],
     select: (data: Candidate[]) => {
-      if (!searchQuery) return data;
+      // First filter by active/inactive status
+      let filteredData = showInactive 
+        ? data 
+        : data.filter(candidate => candidate.isActive);
+        
+      // Then apply search query if it exists
+      if (!searchQuery) return filteredData;
+      
       const lowerCaseQuery = searchQuery.toLowerCase();
-      return data.filter(
+      return filteredData.filter(
         candidate => 
           candidate.fullName.toLowerCase().includes(lowerCaseQuery) ||
           candidate.title.toLowerCase().includes(lowerCaseQuery) ||
