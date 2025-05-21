@@ -24,7 +24,7 @@ function App() {
       <TooltipProvider>
         <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
           <Navbar />
-          <main className="flex-grow">
+          <main className="flex-grow mx-auto px-4 sm:px-6 md:px-8 w-full max-w-[1400px]">
             <Router />
           </main>
           <Toaster />
