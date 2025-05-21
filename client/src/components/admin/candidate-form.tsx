@@ -60,9 +60,36 @@ const CandidateForm = ({ candidate, onSuccess }: CandidateFormProps) => {
 
   const saveCandidate = useMutation({
     mutationFn: async (data: CandidateForm) => {
-      // Convert empty strings to null/undefined for optional fields
+      // Handle skills and certifications properly for editing
+      let skills = data.skills;
+      let certifications = data.certifications || [];
+      
+      // If skills is a string, convert it (this shouldn't happen with our updated schema)
+      if (typeof skills === 'string') {
+        skills = skills.split(',').map(s => s.trim()).filter(Boolean);
+      }
+      
+      // If certifications is a string, convert it
+      if (typeof certifications === 'string') {
+        certifications = certifications.split(',').map(s => s.trim()).filter(Boolean);
+      }
+      
+      // Process bill rate and pay rate
+      const billRate = data.billRate === undefined || data.billRate === null || data.billRate === "" 
+        ? undefined 
+        : typeof data.billRate === 'string' ? parseInt(data.billRate as string) : data.billRate;
+        
+      const payRate = data.payRate === undefined || data.payRate === null || data.payRate === "" 
+        ? undefined 
+        : typeof data.payRate === 'string' ? parseInt(data.payRate as string) : data.payRate;
+        
+      // Create cleaned data object
       const cleanedData = {
         ...data,
+        skills,
+        certifications,
+        billRate,
+        payRate,
         profileImageUrl: data.profileImageUrl || undefined,
         contactEmail: data.contactEmail || undefined,
         contactPhone: data.contactPhone || undefined

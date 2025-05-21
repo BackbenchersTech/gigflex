@@ -50,8 +50,16 @@ export const insertInterestSchema = createInsertSchema(interests).omit({
 
 // Extended schemas for form validation
 export const candidateFormSchema = insertCandidateSchema.extend({
-  skills: z.string().transform(val => val.split(',').map(s => s.trim()).filter(Boolean)),
-  certifications: z.string().optional().transform(val => val ? val.split(',').map(s => s.trim()) : []),
+  skills: z.union([
+    z.string().transform(val => val.split(',').map(s => s.trim()).filter(Boolean)),
+    z.array(z.string())
+  ]),
+  certifications: z.union([
+    z.string().optional().transform(val => val ? val.split(',').map(s => s.trim()) : []),
+    z.array(z.string()).optional()
+  ]),
+  billRate: z.number().optional(),
+  payRate: z.number().optional(),
 });
 
 export const interestFormSchema = insertInterestSchema.extend({
