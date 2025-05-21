@@ -43,13 +43,7 @@ interface CandidateDetailProps {
 }
 
 const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
-  const [activeTab, setActiveTab] = useState("overview");
-
-  // Calculate skill levels for visualization
-  const skillLevels = candidate.skills.slice(0, 5).map((skill, index) => ({
-    name: skill,
-    level: Math.min(100, Math.max(65, 95 - index * 7)) // Generate some variety in skill levels
-  }));
+  const [activeTab, setActiveTab] = useState("details");
 
   return (
     <>
@@ -67,7 +61,7 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <DialogTitle className="text-2xl font-bold">{candidate.initials}</DialogTitle>
-              {candidate.active && (
+              {candidate.isActive && (
                 <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200">
                   <CheckCircle2 className="h-3 w-3 mr-1" /> Available
                 </Badge>
@@ -80,26 +74,11 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
               <MapPin className="h-4 w-4 mr-1" />
               {candidate.location}
             </div>
+            <div className="text-green-600 font-medium text-sm mt-1">
+              <Banknote className="h-4 w-4 inline mr-1" />
+              ${candidate.billRate}/hr
+            </div>
           </div>
-        </div>
-
-        <div className="flex flex-wrap gap-2 mt-4">
-          <Badge variant="secondary" className="px-3 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-200">
-            <Briefcase className="h-3 w-3 mr-1" />
-            {formatExperienceYears(candidate.experienceYears)}
-          </Badge>
-          <Badge variant="secondary" className="px-3 py-1 bg-purple-50 text-purple-600 hover:bg-purple-100 border-purple-200">
-            <Clock className="h-3 w-3 mr-1" />
-            {candidate.availability}
-          </Badge>
-          <Badge variant="secondary" className="px-3 py-1 bg-amber-50 text-amber-600 hover:bg-amber-100 border-amber-200">
-            <GraduationCap className="h-3 w-3 mr-1" />
-            {candidate.education.split(',')[0]}
-          </Badge>
-          <Badge variant="secondary" className="px-3 py-1 bg-green-50 text-green-600 hover:bg-green-100 border-green-200">
-            <Banknote className="h-3 w-3 mr-1" />
-            ${candidate.billRate}/hr
-          </Badge>
         </div>
       </DialogHeader>
 
@@ -108,13 +87,12 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
         onValueChange={setActiveTab}
         className="mt-6"
       >
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="details">Details</TabsTrigger>
           <TabsTrigger value="express-interest">Express Interest</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="overview" className="mt-6 space-y-6">
+        <TabsContent value="details" className="mt-6 space-y-6">
           {/* Bio Section */}
           <Card>
             <CardHeader className="pb-2">
@@ -130,63 +108,25 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
             </CardContent>
           </Card>
 
-          {/* Skills Section with Visualized Proficiency */}
+          {/* Skills Section */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center">
                 <Star className="h-5 w-5 mr-2 text-primary" />
-                Key Skills
+                Skills
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {skillLevels.map((skill) => (
-                  <div key={skill.name} className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span>{skill.name}</span>
-                      <span className="text-muted-foreground">{skill.level}%</span>
-                    </div>
-                    <Progress value={skill.level} className="h-2" />
-                  </div>
+              <div className="flex flex-wrap gap-2">
+                {candidate.skills.map((skill) => (
+                  <Badge key={skill} className="px-3 py-1">
+                    {skill}
+                  </Badge>
                 ))}
               </div>
-              
-              {candidate.skills.length > 5 && (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {candidate.skills.slice(5).map((skill) => (
-                    <Badge key={skill} variant="outline" className="bg-gray-50">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              )}
             </CardContent>
           </Card>
 
-          {/* Certifications */}
-          {candidate.certifications && candidate.certifications.length > 0 && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center">
-                  <Medal className="h-5 w-5 mr-2 text-primary" />
-                  Certifications & Achievements
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {candidate.certifications.map((cert) => (
-                    <li key={cert} className="flex items-start">
-                      <CheckCircle2 className="h-4 w-4 mr-2 text-green-500 mt-0.5" />
-                      <span>{cert}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        <TabsContent value="details" className="mt-6 space-y-6">
           {/* Professional Details */}
           <Card>
             <CardHeader className="pb-2">
@@ -208,10 +148,6 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Education</p>
                   <p className="font-medium">{candidate.education}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Bill Rate</p>
-                  <p className="font-medium text-green-600">${candidate.billRate}/hr</p>
                 </div>
                 {candidate.payRate && (
                   <div className="space-y-1">
