@@ -74,14 +74,14 @@ const CandidateCard = ({ candidate }: CandidateCardProps) => {
             {candidate.skills.slice(0, 3).map((skill) => (
               <Badge 
                 key={skill} 
-                className="bg-primary/20 text-primary-foreground hover:bg-primary/30 border-none px-2.5 py-1 font-medium"
+                className="bg-primary/10 text-primary/80 hover:bg-primary/20 border-none px-2 py-0.5 text-xs font-normal"
               >
                 {skill}
               </Badge>
             ))}
             {candidate.skills.length > 3 && (
               <Badge 
-                className="bg-muted text-muted-foreground hover:bg-muted/80 border-none px-2.5 py-1 font-medium"
+                className="bg-muted/60 text-muted-foreground/80 hover:bg-muted/70 border-none px-2 py-0.5 text-xs font-normal"
               >
                 +{candidate.skills.length - 3}
               </Badge>
