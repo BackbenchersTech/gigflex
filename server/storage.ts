@@ -46,7 +46,9 @@ export class DatabaseStorage implements IStorage {
       profileImageUrl: candidate.profileImageUrl || null,
       contactEmail: candidate.contactEmail || null,
       contactPhone: candidate.contactPhone || null,
-      certifications: candidate.certifications || []
+      certifications: candidate.certifications || [],
+      billRate: candidate.billRate === undefined ? null : candidate.billRate,
+      payRate: candidate.payRate === undefined ? null : candidate.payRate
     };
     
     const [insertedCandidate] = await db.insert(candidates).values(newCandidate).returning();
@@ -60,7 +62,9 @@ export class DatabaseStorage implements IStorage {
       profileImageUrl: candidateData.profileImageUrl || null,
       contactEmail: candidateData.contactEmail || null,
       contactPhone: candidateData.contactPhone || null,
-      certifications: candidateData.certifications || []
+      certifications: candidateData.certifications || [],
+      billRate: candidateData.billRate === undefined ? null : candidateData.billRate,
+      payRate: candidateData.payRate === undefined ? null : candidateData.payRate
     };
     
     const result = await db.update(candidates)
