@@ -26,7 +26,7 @@ const Navbar = () => {
             <img 
               src="/gigflex-logo.png" 
               alt="GigFlex" 
-              className="h-8" 
+              className="h-12" 
             />
           </Link>
           
