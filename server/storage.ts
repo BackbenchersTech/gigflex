@@ -3,7 +3,7 @@ import {
   interests, Interest, InsertInterest
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, ilike, gte, and, or, inArray } from "drizzle-orm";
+import { eq, ilike, gte, and, or, inArray, sql } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -100,10 +100,11 @@ export class DatabaseStorage implements IStorage {
     
     // Add filters based on parameters
     if (skills && skills.length > 0) {
-      // For each skill, check if it's in the skills array
+      // Create separate conditions for each skill
       const skillConditions = skills.map(skill => 
-        sql`${candidates.skills} @> ARRAY[${skill}]::text[]`
+        sql`${skill} = ANY(${candidates.skills})`
       );
+      
       if (skillConditions.length > 0) {
         conditions.push(or(...skillConditions));
       }

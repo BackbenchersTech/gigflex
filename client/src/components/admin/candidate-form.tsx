@@ -58,11 +58,21 @@ const CandidateForm = ({ candidate, onSuccess }: CandidateFormProps) => {
 
   const saveCandidate = useMutation({
     mutationFn: async (data: CandidateForm) => {
+      // Convert empty strings to null/undefined for optional fields
+      const cleanedData = {
+        ...data,
+        profileImageUrl: data.profileImageUrl || undefined,
+        contactEmail: data.contactEmail || undefined,
+        contactPhone: data.contactPhone || undefined
+      };
+      
+      console.log("Submitting data:", cleanedData);
+      
       if (isEditing) {
-        const res = await apiRequest("PUT", `/api/candidates/${candidate.id}`, data);
+        const res = await apiRequest("PUT", `/api/candidates/${candidate.id}`, cleanedData);
         return await res.json();
       } else {
-        const res = await apiRequest("POST", "/api/candidates", data);
+        const res = await apiRequest("POST", "/api/candidates", cleanedData);
         return await res.json();
       }
     },

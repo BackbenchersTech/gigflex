@@ -71,7 +71,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedCandidate);
     } catch (error) {
       console.error("Update candidate error:", error);
+      console.log("Request body:", JSON.stringify(req.body, null, 2));
+      
       if (error instanceof ZodError) {
+        console.error("Zod validation errors:", JSON.stringify(error.errors, null, 2));
         return res.status(400).json({ 
           message: "Invalid candidate data", 
           errors: error.errors
