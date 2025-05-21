@@ -212,7 +212,6 @@ const CandidateList = () => {
               <TableRow>
                 <TableHead>Candidate</TableHead>
                 <TableHead>Title</TableHead>
-                <TableHead>Skills</TableHead>
                 <TableHead>Experience</TableHead>
                 <TableHead>Bill Rate</TableHead>
                 <TableHead>Pay Rate</TableHead>
@@ -245,20 +244,6 @@ const CandidateList = () => {
                     </div>
                   </TableCell>
                   <TableCell>{candidate.title}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {candidate.skills.slice(0, 2).map((skill) => (
-                        <Badge key={skill} variant="secondary" className="text-xs">
-                          {skill}
-                        </Badge>
-                      ))}
-                      {candidate.skills.length > 2 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{candidate.skills.length - 2}
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>
                   <TableCell>{candidate.experienceYears} years</TableCell>
                   <TableCell>{candidate.billRate ? `$${candidate.billRate}/hr` : "—"}</TableCell>
                   <TableCell>{candidate.payRate ? `$${candidate.payRate}/hr` : "—"}</TableCell>
