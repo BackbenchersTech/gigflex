@@ -235,20 +235,22 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
         </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 bg-slate-50 dark:bg-gray-900 border-t z-50 flex justify-between items-center h-14 shadow-sm">
-        <Button type="button" onClick={onClose} variant="outline" className="ml-4">
-          Close
-        </Button>
-        
-        {showInterestForm ? (
-          <Button variant="secondary" onClick={() => setShowInterestForm(false)} className="mr-4">
-            View Profile
+      <div className="absolute bottom-0 left-0 right-0 bg-slate-50 dark:bg-gray-900 border-t z-50 flex justify-end items-center h-14">
+        <div className="flex space-x-2 mr-4">
+          <Button type="button" onClick={onClose} variant="outline">
+            Close
           </Button>
-        ) : (
-          <Button onClick={() => setShowInterestForm(true)} className="mr-4">
-            Express Interest
-          </Button>
-        )}
+          
+          {showInterestForm ? (
+            <Button variant="secondary" onClick={() => setShowInterestForm(false)}>
+              View Profile
+            </Button>
+          ) : (
+            <Button onClick={() => setShowInterestForm(true)}>
+              Express Interest
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
