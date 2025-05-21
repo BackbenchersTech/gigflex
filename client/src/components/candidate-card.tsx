@@ -76,6 +76,12 @@ const CandidateCard = ({ candidate }: CandidateCardProps) => {
               <span>Available {candidate.availability.toLowerCase()}</span>
             </div>
             
+            {candidate.billRate && (
+              <div className="flex items-center text-sm font-semibold text-green-600 dark:text-green-500 mt-2">
+                <DollarSign className="h-4 w-4 mr-2" />
+                <span>${candidate.billRate}/hr</span>
+              </div>
+            )}
 
           </CardContent>
           
