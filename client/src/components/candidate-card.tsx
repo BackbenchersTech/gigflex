@@ -55,29 +55,35 @@ const CandidateCard = ({ candidate }: CandidateCardProps) => {
             <p className="text-lg text-muted-foreground">{candidate.title}</p>
             
             <div className="flex items-center text-sm text-muted-foreground mt-2">
-              <MapPin className="h-4 w-4 mr-1" />
+              <MapPin className="h-4 w-4 mr-2" />
               <span>{candidate.location}</span>
             </div>
             
             <div className="flex items-center text-sm text-muted-foreground mt-1">
-              <Briefcase className="h-4 w-4 mr-1" />
+              <Briefcase className="h-4 w-4 mr-2" />
               <span>{formatExperienceYears(candidate.experienceYears)}</span>
             </div>
             
             <div className="flex items-center text-sm text-muted-foreground mt-1">
-              <CalendarClock className="h-4 w-4 mr-1" />
+              <CalendarClock className="h-4 w-4 mr-2" />
               <span>Available {candidate.availability.toLowerCase()}</span>
             </div>
           </CardContent>
           
           <CardFooter className="px-6 pb-6 pt-0 flex flex-wrap gap-2">
             {candidate.skills.slice(0, 3).map((skill) => (
-              <Badge key={skill} variant="secondary">
+              <Badge 
+                key={skill} 
+                className="bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20 font-medium"
+              >
                 {skill}
               </Badge>
             ))}
             {candidate.skills.length > 3 && (
-              <Badge variant="outline">
+              <Badge 
+                variant="outline" 
+                className="bg-muted/50 hover:bg-muted"
+              >
                 +{candidate.skills.length - 3}
               </Badge>
             )}
