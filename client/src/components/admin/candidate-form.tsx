@@ -86,13 +86,15 @@ const CandidateForm = ({ candidate, onSuccess }: CandidateFormProps) => {
       // Create cleaned data object
       const cleanedData = {
         ...data,
+        initials: data.initials || '', // Ensure initials are sent even if empty
         skills,
         certifications,
         billRate,
         payRate,
-        profileImageUrl: data.profileImageUrl || undefined,
-        contactEmail: data.contactEmail || undefined,
-        contactPhone: data.contactPhone || undefined
+        // Explicitly set these fields even when they're empty
+        profileImageUrl: data.profileImageUrl === '' ? null : data.profileImageUrl,
+        contactEmail: data.contactEmail === '' ? null : data.contactEmail,
+        contactPhone: data.contactPhone === '' ? null : data.contactPhone
       };
       
       console.log("Submitting data:", cleanedData);
