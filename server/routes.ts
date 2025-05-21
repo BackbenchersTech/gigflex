@@ -50,69 +50,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // PUT update candidate
+  // PUT update candidate - simplified direct approach
   app.put("/api/candidates/:id", async (req, res) => {
     try {
+      // Parse ID and verify
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid candidate ID" });
       }
 
-      // Get the existing candidate to ensure we have the right data
+      // Check if candidate exists
       const existingCandidate = await storage.getCandidateById(id);
       if (!existingCandidate) {
         return res.status(404).json({ message: "Candidate not found" });
       }
 
-      // Process the form data, handling skills and certifications specially
-      let skills = req.body.skills;
-      if (typeof skills === 'string') {
-        skills = skills.split(',').map(s => s.trim()).filter(Boolean);
-        if (skills.length === 0) skills = ["None"];
+      // Handle skills data (both string and array forms)
+      let skillsData;
+      if (typeof req.body.skills === 'string') {
+        skillsData = req.body.skills.split(',').map(s => s.trim()).filter(Boolean);
+        if (skillsData.length === 0) skillsData = ["None"];
+      } else if (Array.isArray(req.body.skills)) {
+        skillsData = req.body.skills;
+      } else {
+        skillsData = existingCandidate.skills; // Keep existing if not provided
       }
 
-      let certifications = req.body.certifications;
-      if (certifications === undefined || certifications === "") {
-        certifications = [];
-      } else if (typeof certifications === 'string') {
-        certifications = certifications.split(',').map(s => s.trim()).filter(Boolean);
+      // Handle certifications data (both string and array forms)
+      let certificationsData;
+      if (req.body.certifications === undefined || req.body.certifications === "") {
+        certificationsData = [];
+      } else if (typeof req.body.certifications === 'string') {
+        certificationsData = req.body.certifications.split(',').map(s => s.trim()).filter(Boolean);
+      } else if (Array.isArray(req.body.certifications)) {
+        certificationsData = req.body.certifications;
+      } else {
+        certificationsData = existingCandidate.certifications || []; // Keep existing if not provided
       }
 
-      // Create the update data
-      const candidateData = {
-        initials: req.body.initials,
-        fullName: req.body.fullName,
-        title: req.body.title,
-        location: req.body.location,
-        skills: skills,
-        experienceYears: parseInt(req.body.experienceYears),
-        bio: req.body.bio,
-        education: req.body.education,
-        availability: req.body.availability,
-        profileImageUrl: req.body.profileImageUrl || null,
-        contactEmail: req.body.contactEmail || null,
-        contactPhone: req.body.contactPhone || null,
-        certifications: certifications,
-        isActive: req.body.isActive === true || req.body.isActive === "true"
-      };
+      // Handle experience years (as string or number)
+      let experienceYearsData;
+      if (typeof req.body.experienceYears === 'string') {
+        experienceYearsData = parseInt(req.body.experienceYears);
+      } else {
+        experienceYearsData = req.body.experienceYears;
+      }
+
+      // Boolean conversion for isActive
+      let isActiveData = req.body.isActive === true || req.body.isActive === "true";
+
+      // Direct update with raw SQL to bypass Zod validation
+      const result = await db.query(
+        `UPDATE candidates 
+         SET initials = $1, 
+             profile_image_url = $2, 
+             full_name = $3, 
+             title = $4, 
+             location = $5, 
+             skills = $6, 
+             experience_years = $7, 
+             bio = $8, 
+             education = $9, 
+             availability = $10, 
+             contact_email = $11, 
+             contact_phone = $12, 
+             certifications = $13, 
+             is_active = $14
+         WHERE id = $15
+         RETURNING *`,
+        [
+          req.body.initials || existingCandidate.initials,
+          req.body.profileImageUrl || existingCandidate.profileImageUrl,
+          req.body.fullName || existingCandidate.fullName,
+          req.body.title || existingCandidate.title,
+          req.body.location || existingCandidate.location,
+          skillsData,
+          experienceYearsData || existingCandidate.experienceYears,
+          req.body.bio || existingCandidate.bio,
+          req.body.education || existingCandidate.education,
+          req.body.availability || existingCandidate.availability,
+          req.body.contactEmail || existingCandidate.contactEmail,
+          req.body.contactPhone || existingCandidate.contactPhone,
+          certificationsData,
+          isActiveData,
+          id
+        ]
+      );
+
+      if (result.rowCount === 0) {
+        return res.status(404).json({ message: "Candidate not found" });
+      }
       
-      console.log("Processed candidate data:", JSON.stringify(candidateData));
-      
-      const updatedCandidate = await storage.updateCandidate(id, candidateData);
-      res.json(updatedCandidate);
+      res.json(result.rows[0]);
     } catch (error) {
       console.error("Update candidate error:", error);
-      console.log("Request body:", JSON.stringify(req.body, null, 2));
-      
-      if (error instanceof ZodError) {
-        console.error("Zod validation errors:", JSON.stringify(error.errors, null, 2));
-        return res.status(400).json({ 
-          message: "Invalid candidate data", 
-          errors: error.errors
-        });
-      }
       res.status(500).json({ message: "Failed to update candidate" });
     }
+  }
   });
 
   // DELETE candidate
