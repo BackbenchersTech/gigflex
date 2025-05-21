@@ -34,21 +34,24 @@ const CandidateCard = ({ candidate }: CandidateCardProps) => {
         <Card className="h-full cursor-pointer hover:shadow-md transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-start justify-between mb-4">
-              <Avatar className="h-16 w-16">
-                {candidate.profileImageUrl ? (
-                  <AvatarImage src={candidate.profileImageUrl} alt={candidate.initials} />
-                ) : (
-                  <AvatarFallback className="text-lg bg-primary text-primary-foreground">
-                    {candidate.initials}
-                  </AvatarFallback>
-                )}
-              </Avatar>
+              <div className="flex items-center">
+                <Avatar className="h-16 w-16">
+                  {candidate.profileImageUrl ? (
+                    <AvatarImage src={candidate.profileImageUrl} alt={candidate.initials} />
+                  ) : (
+                    <AvatarFallback className="text-lg bg-primary text-primary-foreground">
+                      {candidate.initials}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+                <div className="ml-3">
+                  <h3 className="text-xl font-semibold">{candidate.initials}</h3>
+                </div>
+              </div>
               <Badge variant="outline" className="uppercase">
                 {candidate.availability}
               </Badge>
             </div>
-            
-            <h3 className="text-xl font-semibold mt-2">{candidate.initials}</h3>
             <p className="text-lg text-muted-foreground">{candidate.title}</p>
             
             <div className="flex items-center text-sm text-muted-foreground mt-2">
