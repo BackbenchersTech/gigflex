@@ -1,9 +1,27 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import multer from "multer";
+import pdfParse from "pdf-parse";
 import { storage } from "./storage";
+import { parseResume } from "./openai";
 import { interestFormSchema, candidateFormSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { pool } from "./db";
+
+// Configure multer for file uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/pdf' || file.mimetype.startsWith('text/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF and text files are allowed'));
+    }
+  },
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Routes for natural language search and filtering
@@ -189,6 +207,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(interests);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch interests" });
+    }
+  });
+
+  // POST parse resume and create candidate
+  app.post("/api/candidates/parse-resume", upload.single('resume'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      let resumeText = "";
+      
+      if (req.file.mimetype === 'application/pdf') {
+        const pdfData = await pdfParse(req.file.buffer);
+        resumeText = pdfData.text;
+      } else {
+        resumeText = req.file.buffer.toString('utf-8');
+      }
+
+      const parsedData = await parseResume(resumeText);
+      
+      // Generate initials from full name
+      const initials = parsedData.fullName
+        .split(' ')
+        .map(name => name.charAt(0).toUpperCase())
+        .join('');
+
+      const candidateData = {
+        initials,
+        title: parsedData.title,
+        location: parsedData.location,
+        skills: parsedData.skills,
+        experienceYears: parsedData.experienceYears,
+        education: parsedData.education,
+        bio: parsedData.bio,
+        certifications: parsedData.certifications,
+        contactEmail: parsedData.email,
+        contactPhone: parsedData.phone,
+        availability: "Available",
+        isActive: true,
+        billRate: 100, // Default rate, can be updated later
+        payRate: 80,
+        profileImageUrl: null
+      };
+
+      const newCandidate = await storage.createCandidate(candidateData);
+      res.status(201).json(newCandidate);
+    } catch (error) {
+      console.error("Resume parsing error:", error);
+      res.status(500).json({ message: "Failed to parse resume" });
     }
   });
 
