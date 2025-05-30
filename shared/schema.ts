@@ -37,6 +37,26 @@ export const interests = pgTable("interests", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Analytics Schema - Candidate Views
+export const candidateViews = pgTable("candidate_views", {
+  id: serial("id").primaryKey(),
+  candidateId: integer("candidate_id").notNull(),
+  viewedAt: timestamp("viewed_at").defaultNow(),
+  userAgent: text("user_agent"),
+  ipAddress: text("ip_address"),
+});
+
+// Analytics Schema - Search Activity
+export const searchActivity = pgTable("search_activity", {
+  id: serial("id").primaryKey(),
+  searchQuery: text("search_query").notNull(),
+  searchType: text("search_type").notNull(), // 'general', 'skills', 'experience', etc.
+  resultsCount: integer("results_count").notNull(),
+  searchedAt: timestamp("searched_at").defaultNow(),
+  userAgent: text("user_agent"),
+  ipAddress: text("ip_address"),
+});
+
 // Insert Schemas
 export const insertCandidateSchema = createInsertSchema(candidates).omit({
   id: true,

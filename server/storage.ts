@@ -1,6 +1,7 @@
 import { 
   candidates, Candidate, InsertCandidate,
-  interests, Interest, InsertInterest
+  interests, Interest, InsertInterest,
+  candidateViews, searchActivity
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, ilike, gte, and, or, inArray, sql, desc } from "drizzle-orm";
@@ -26,6 +27,14 @@ export interface IStorage {
   getInterestsByCandidate(candidateId: number): Promise<Interest[]>;
   createInterest(interest: InsertInterest): Promise<Interest>;
   updateInterestStatus(id: number, status: string): Promise<Interest | undefined>;
+
+  // Analytics operations
+  trackCandidateView(candidateId: number, userAgent?: string, ipAddress?: string): Promise<void>;
+  trackSearch(query: string, searchType: string, resultsCount: number, userAgent?: string, ipAddress?: string): Promise<void>;
+  getCandidateViewStats(): Promise<any[]>;
+  getSearchStats(): Promise<any[]>;
+  getTopViewedCandidates(limit?: number): Promise<any[]>;
+  getRecentSearches(limit?: number): Promise<any[]>;
 }
 
 // Database implementation
@@ -247,6 +256,91 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return result.length > 0 ? result[0] : undefined;
+  }
+
+  // Analytics operations
+  async trackCandidateView(candidateId: number, userAgent?: string, ipAddress?: string): Promise<void> {
+    await db.insert(candidateViews).values({
+      candidateId,
+      userAgent: userAgent || null,
+      ipAddress: ipAddress || null,
+    });
+  }
+
+  async trackSearch(query: string, searchType: string, resultsCount: number, userAgent?: string, ipAddress?: string): Promise<void> {
+    await db.insert(searchActivity).values({
+      searchQuery: query,
+      searchType,
+      resultsCount,
+      userAgent: userAgent || null,
+      ipAddress: ipAddress || null,
+    });
+  }
+
+  async getCandidateViewStats(): Promise<any[]> {
+    const result = await db
+      .select({
+        candidateId: candidateViews.candidateId,
+        initials: candidates.initials,
+        title: candidates.title,
+        viewCount: sql<number>`count(*)`,
+        lastViewed: sql<string>`max(${candidateViews.viewedAt})`,
+      })
+      .from(candidateViews)
+      .leftJoin(candidates, eq(candidateViews.candidateId, candidates.id))
+      .groupBy(candidateViews.candidateId, candidates.initials, candidates.title)
+      .orderBy(desc(sql`count(*)`));
+    
+    return result;
+  }
+
+  async getSearchStats(): Promise<any[]> {
+    const result = await db
+      .select({
+        searchQuery: searchActivity.searchQuery,
+        searchCount: sql<number>`count(*)`,
+        avgResults: sql<number>`avg(${searchActivity.resultsCount})`,
+        lastSearched: sql<string>`max(${searchActivity.searchedAt})`,
+      })
+      .from(searchActivity)
+      .groupBy(searchActivity.searchQuery)
+      .orderBy(desc(sql`count(*)`))
+      .limit(50);
+    
+    return result;
+  }
+
+  async getTopViewedCandidates(limit = 10): Promise<any[]> {
+    const result = await db
+      .select({
+        candidateId: candidateViews.candidateId,
+        initials: candidates.initials,
+        title: candidates.title,
+        location: candidates.location,
+        viewCount: sql<number>`count(*)`,
+      })
+      .from(candidateViews)
+      .leftJoin(candidates, eq(candidateViews.candidateId, candidates.id))
+      .groupBy(candidateViews.candidateId, candidates.initials, candidates.title, candidates.location)
+      .orderBy(desc(sql`count(*)`))
+      .limit(limit);
+    
+    return result;
+  }
+
+  async getRecentSearches(limit = 20): Promise<any[]> {
+    const result = await db
+      .select({
+        searchQuery: searchActivity.searchQuery,
+        searchType: searchActivity.searchType,
+        resultsCount: searchActivity.resultsCount,
+        searchedAt: searchActivity.searchedAt,
+      })
+      .from(searchActivity)
+      .orderBy(desc(searchActivity.searchedAt))
+      .limit(limit);
+    
+    return result;
   }
 }
 
