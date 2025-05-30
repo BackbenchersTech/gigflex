@@ -35,6 +35,8 @@ export interface IStorage {
   getSearchStats(): Promise<any[]>;
   getTopViewedCandidates(limit?: number): Promise<any[]>;
   getRecentSearches(limit?: number): Promise<any[]>;
+  getTotalSearchCount(): Promise<number>;
+  getTotalViewCount(): Promise<number>;
 }
 
 // Database implementation
@@ -341,6 +343,20 @@ export class DatabaseStorage implements IStorage {
       .limit(limit);
     
     return result;
+  }
+
+  async getTotalSearchCount(): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(searchActivity);
+    return result[0]?.count || 0;
+  }
+
+  async getTotalViewCount(): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(candidateViews);
+    return result[0]?.count || 0;
   }
 }
 

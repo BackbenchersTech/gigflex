@@ -352,18 +352,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // GET analytics dashboard data
   app.get("/api/analytics/dashboard", async (req, res) => {
     try {
-      const [candidateViewStats, searchStats, topViewedCandidates, recentSearches] = await Promise.all([
+      const [candidateViewStats, searchStats, topViewedCandidates, recentSearches, totalViews, totalSearches] = await Promise.all([
         storage.getCandidateViewStats(),
         storage.getSearchStats(),
         storage.getTopViewedCandidates(10),
-        storage.getRecentSearches(20)
+        storage.getRecentSearches(20),
+        storage.getTotalViewCount(),
+        storage.getTotalSearchCount()
       ]);
 
       res.json({
         candidateViewStats,
         searchStats,
         topViewedCandidates,
-        recentSearches
+        recentSearches,
+        totalViews,
+        totalSearches
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch analytics data" });

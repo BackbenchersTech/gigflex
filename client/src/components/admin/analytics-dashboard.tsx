@@ -41,18 +41,19 @@ const AnalyticsDashboard = () => {
     );
   }
 
-  const { candidateViewStats, searchStats, topViewedCandidates, recentSearches } = analyticsData as {
+  const { candidateViewStats, searchStats, topViewedCandidates, recentSearches, totalViews, totalSearches } = analyticsData as {
     candidateViewStats: any[];
     searchStats: any[];
     topViewedCandidates: any[];
     recentSearches: any[];
+    totalViews: number;
+    totalSearches: number;
   };
 
-  const totalViews = candidateViewStats.reduce((acc: number, stat: any) => acc + stat.viewCount, 0);
-  const totalSearches = searchStats.reduce((acc: number, stat: any) => acc + stat.searchCount, 0);
+  const totalUniqueSearchTerms = searchStats.length;
   const avgSearchResults = searchStats.length > 0 
-    ? (searchStats.reduce((acc: number, stat: any) => acc + stat.avgResults, 0) / searchStats.length).toFixed(1)
-    : 0;
+    ? (searchStats.reduce((acc: number, stat: any) => acc + Number(stat.avgResults || 0), 0) / searchStats.length).toFixed(1)
+    : "0";
 
   return (
     <div className="space-y-6">
@@ -99,13 +100,13 @@ const AnalyticsDashboard = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Candidates</CardTitle>
+            <CardTitle className="text-sm font-medium">Search Terms</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{topViewedCandidates.length}</div>
+            <div className="text-2xl font-bold">{totalUniqueSearchTerms}</div>
             <p className="text-xs text-muted-foreground">
-              With profile views
+              Unique search queries
             </p>
           </CardContent>
         </Card>
