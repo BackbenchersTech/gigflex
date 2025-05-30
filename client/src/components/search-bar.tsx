@@ -2,11 +2,13 @@ import { FormEvent, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, X } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
   placeholder?: string;
   initialValue?: string;
+  resultsCount?: number;
 }
 
 const SearchBar = ({ 

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { apiRequest } from "@/lib/queryClient";
 import {
   DialogHeader,
   DialogTitle,
@@ -36,6 +37,24 @@ interface CandidateDetailProps {
 
 const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
   const [showInterestForm, setShowInterestForm] = useState(false);
+
+  // Track candidate view when component mounts
+  useEffect(() => {
+    const trackView = async () => {
+      try {
+        await fetch("/api/analytics/candidate-view", {
+          method: "POST",
+          body: JSON.stringify({ candidateId: candidate.id }),
+          headers: { "Content-Type": "application/json" }
+        });
+      } catch (error) {
+        // Silently fail view tracking to not disrupt user experience
+        console.error("Failed to track candidate view:", error);
+      }
+    };
+
+    trackView();
+  }, [candidate.id]);
 
   return (
     <div className="flex flex-col h-full">

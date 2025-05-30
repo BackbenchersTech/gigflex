@@ -312,6 +312,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Analytics routes
+  // POST track candidate view
+  app.post("/api/analytics/candidate-view", async (req, res) => {
+    try {
+      const { candidateId } = req.body;
+      if (!candidateId) {
+        return res.status(400).json({ message: "Candidate ID is required" });
+      }
+
+      const userAgent = req.headers['user-agent'];
+      const ipAddress = req.ip || req.connection.remoteAddress;
+      
+      await storage.trackCandidateView(candidateId, userAgent, ipAddress);
+      res.status(200).json({ message: "View tracked" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to track view" });
+    }
+  });
+
+  // POST track search
+  app.post("/api/analytics/search", async (req, res) => {
+    try {
+      const { query, searchType, resultsCount } = req.body;
+      if (!query || !searchType || resultsCount === undefined) {
+        return res.status(400).json({ message: "Query, searchType, and resultsCount are required" });
+      }
+
+      const userAgent = req.headers['user-agent'];
+      const ipAddress = req.ip || req.connection.remoteAddress;
+      
+      await storage.trackSearch(query, searchType, resultsCount, userAgent, ipAddress);
+      res.status(200).json({ message: "Search tracked" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to track search" });
+    }
+  });
+
+  // GET analytics dashboard data
+  app.get("/api/analytics/dashboard", async (req, res) => {
+    try {
+      const [candidateViewStats, searchStats, topViewedCandidates, recentSearches] = await Promise.all([
+        storage.getCandidateViewStats(),
+        storage.getSearchStats(),
+        storage.getTopViewedCandidates(10),
+        storage.getRecentSearches(20)
+      ]);
+
+      res.json({
+        candidateViewStats,
+        searchStats,
+        topViewedCandidates,
+        recentSearches
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch analytics data" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
