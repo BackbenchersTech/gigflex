@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { 
+import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
@@ -11,11 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import InterestForm from "@/components/interest-form";
-import { 
-  Briefcase, 
-  MapPin, 
-  GraduationCap, 
-  Award, 
+import {
+  Briefcase,
+  MapPin,
+  GraduationCap,
+  Award,
   Clock,
   Banknote,
   Users,
@@ -24,7 +24,7 @@ import {
   Star,
   Medal,
   GanttChart,
-  Share2
+  Share2,
 } from "lucide-react";
 import { formatExperienceYears } from "@/lib/utils";
 import type { Candidate } from "@shared/schema";
@@ -39,12 +39,15 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto pr-2 pb-16">
+      <div className="flex-1 p-6 overflow-y-auto pr-2 pb-16">
         <DialogHeader className="text-left">
           <div className="flex items-center gap-4">
             <Avatar className="h-20 w-20 border-2 border-primary">
               {candidate.profileImageUrl ? (
-                <AvatarImage src={candidate.profileImageUrl} alt={candidate.initials} />
+                <AvatarImage
+                  src={candidate.profileImageUrl}
+                  alt={candidate.initials}
+                />
               ) : (
                 <AvatarFallback className="text-xl bg-primary text-primary-foreground">
                   {candidate.initials}
@@ -53,9 +56,14 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
             </Avatar>
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <DialogTitle className="text-2xl font-bold">{candidate.initials}</DialogTitle>
+                <DialogTitle className="text-2xl font-bold">
+                  {candidate.initials}
+                </DialogTitle>
                 {candidate.isActive && (
-                  <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200">
+                  <Badge
+                    variant="outline"
+                    className="bg-green-50 text-green-600 border-green-200"
+                  >
                     <CheckCircle2 className="h-3 w-3 mr-1" /> Available
                   </Badge>
                 )}
@@ -68,8 +76,8 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
                 {candidate.location}
               </div>
               <div className="text-green-600 font-medium text-sm mt-1">
-                <Banknote className="h-4 w-4 inline mr-1" />
-                ${candidate.billRate}/hr
+                <Banknote className="h-4 w-4 inline mr-1" />$
+                {candidate.billRate}/hr
               </div>
             </div>
           </div>
@@ -84,7 +92,8 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
                   Contact About This Candidate
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Fill out the form below to express your interest in this candidate. Our team will get back to you shortly.
+                  Fill out the form below to express your interest in this
+                  candidate. Our team will get back to you shortly.
                 </p>
               </CardHeader>
               <CardContent>
@@ -103,7 +112,8 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
                 </CardHeader>
                 <CardContent className="pl-6">
                   <p className="text-muted-foreground">
-                    {candidate.bio || "Experienced professional with a proven track record in the industry."}
+                    {candidate.bio ||
+                      "Experienced professional with a proven track record in the industry."}
                   </p>
                 </CardContent>
               </Card>
@@ -119,7 +129,11 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
                 <CardContent className="pl-6">
                   <div className="flex flex-wrap gap-2">
                     {candidate.skills.map((skill) => (
-                      <Badge key={skill} variant="secondary" className="bg-slate-100 text-slate-800 hover:bg-slate-200 rounded-md text-[10px] font-normal">
+                      <Badge
+                        key={skill}
+                        variant="secondary"
+                        className="bg-slate-100 text-slate-800 hover:bg-slate-200 rounded-md text-[10px] font-normal"
+                      >
                         {skill}
                       </Badge>
                     ))}
@@ -138,11 +152,17 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
                 <CardContent className="pl-6 space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">Industry Experience</p>
-                      <p className="font-medium">{formatExperienceYears(candidate.experienceYears)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Industry Experience
+                      </p>
+                      <p className="font-medium">
+                        {formatExperienceYears(candidate.experienceYears)}
+                      </p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm text-muted-foreground">Availability</p>
+                      <p className="text-sm text-muted-foreground">
+                        Availability
+                      </p>
                       <p className="font-medium">{candidate.availability}</p>
                     </div>
                     <div className="space-y-1">
@@ -154,26 +174,27 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
               </Card>
 
               {/* Certifications */}
-              {candidate.certifications && candidate.certifications.length > 0 && (
-                <Card className="overflow-hidden">
-                  <CardHeader className="pb-1 pl-4 pt-4">
-                    <CardTitle className="text-lg flex items-center">
-                      <Medal className="h-5 w-5 mr-2 text-primary" />
-                      Certifications & Achievements
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pl-6">
-                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      {candidate.certifications.map((cert) => (
-                        <li key={cert} className="flex items-start">
-                          <CheckCircle2 className="h-4 w-4 mr-2 text-green-500 mt-0.5" />
-                          <span>{cert}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              )}
+              {candidate.certifications &&
+                candidate.certifications.length > 0 && (
+                  <Card className="overflow-hidden">
+                    <CardHeader className="pb-1 pl-4 pt-4">
+                      <CardTitle className="text-lg flex items-center">
+                        <Medal className="h-5 w-5 mr-2 text-primary" />
+                        Certifications & Achievements
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pl-6">
+                      <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {candidate.certifications.map((cert) => (
+                          <li key={cert} className="flex items-start">
+                            <CheckCircle2 className="h-4 w-4 mr-2 text-green-500 mt-0.5" />
+                            <span>{cert}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                )}
 
               {/* Project Experience */}
               <Card className="overflow-hidden">
@@ -189,21 +210,31 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
                       <div className="absolute w-3 h-3 bg-primary rounded-full -left-[7px] top-1"></div>
                       <h4 className="text-base font-medium">Senior Role</h4>
                       <p className="text-sm text-muted-foreground mb-1">
-                        {candidate.experienceYears > 5 ? "5+ years" : `${Math.max(1, candidate.experienceYears-2)}+ years`}
+                        {candidate.experienceYears > 5
+                          ? "5+ years"
+                          : `${Math.max(1, candidate.experienceYears - 2)}+ years`}
                       </p>
                       <p className="text-sm">
-                        Led cross-functional teams and delivered key projects in {candidate.skills.slice(0, 2).join(" and ")} technologies.
+                        Led cross-functional teams and delivered key projects in{" "}
+                        {candidate.skills.slice(0, 2).join(" and ")}{" "}
+                        technologies.
                       </p>
                     </div>
 
                     <div className="border-l-2 border-gray-200 pl-4 relative">
                       <div className="absolute w-3 h-3 bg-gray-400 rounded-full -left-[7px] top-1"></div>
-                      <h4 className="text-base font-medium">Earlier Experience</h4>
+                      <h4 className="text-base font-medium">
+                        Earlier Experience
+                      </h4>
                       <p className="text-sm text-muted-foreground mb-1">
-                        {candidate.experienceYears > 3 ? "3+ years" : "1-2 years"}
+                        {candidate.experienceYears > 3
+                          ? "3+ years"
+                          : "1-2 years"}
                       </p>
                       <p className="text-sm">
-                        Developed expertise in {candidate.skills.slice(1, 3).join(", ")} and contributed to various projects.
+                        Developed expertise in{" "}
+                        {candidate.skills.slice(1, 3).join(", ")} and
+                        contributed to various projects.
                       </p>
                     </div>
                   </div>
@@ -221,11 +252,21 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
                 <CardContent className="pl-6">
                   <div className="space-y-4">
                     <div className="bg-muted/50 p-3 rounded-lg relative">
-                      <div className="absolute top-0 right-0 p-2 text-2xl text-muted-foreground">"</div>
+                      <div className="absolute top-0 right-0 p-2 text-2xl text-muted-foreground">
+                        "
+                      </div>
                       <p className="text-sm italic">
-                        A {candidate.experienceYears > 5 ? "seasoned" : "talented"} professional who consistently delivers high-quality work. Their expertise in {candidate.skills[0]} was particularly valuable to our project.
+                        A{" "}
+                        {candidate.experienceYears > 5
+                          ? "seasoned"
+                          : "talented"}{" "}
+                        professional who consistently delivers high-quality
+                        work. Their expertise in {candidate.skills[0]} was
+                        particularly valuable to our project.
                       </p>
-                      <p className="text-sm font-medium mt-2">— Previous Client</p>
+                      <p className="text-sm font-medium mt-2">
+                        — Previous Client
+                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -235,18 +276,22 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
         </div>
       </div>
 
-      <DialogFooter className="flex justify-end bg-slate-50 dark:bg-gray-900 border-t p-0 h-14 sticky bottom-0 left-0 right-0">
-        <div className="flex items-center space-x-2 mr-4 h-full">
-          <Button type="button" onClick={onClose} variant="outline">
+      <DialogFooter className="flex justify-end bg-blue-50 dark:bg-blue-900 border-t border-blue-200 dark:border-blue-700 p-0 h-16 sticky bottom-0 left-0 right-0 shadow-lg">
+        <div className="flex items-center space-x-4 py-2 mr-8 h-full">
+          <Button type="button" onClick={onClose} variant="outline" className="px-6 py-2">
             Close
           </Button>
-          
+
           {showInterestForm ? (
-            <Button variant="secondary" onClick={() => setShowInterestForm(false)}>
+            <Button
+              variant="secondary"
+              onClick={() => setShowInterestForm(false)}
+              className="px-6 py-2"
+            >
               View Profile
             </Button>
           ) : (
-            <Button onClick={() => setShowInterestForm(true)}>
+            <Button onClick={() => setShowInterestForm(true)} className="px-6 py-2">
               Express Interest
             </Button>
           )}
