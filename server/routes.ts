@@ -1,7 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import multer from "multer";
-import pdfParse from "pdf-parse";
 import { storage } from "./storage";
 import { parseResume } from "./openai";
 import { interestFormSchema, candidateFormSchema } from "@shared/schema";
@@ -220,6 +219,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let resumeText = "";
       
       if (req.file.mimetype === 'application/pdf') {
+        // Dynamically import pdf-parse to avoid initialization issues
+        const pdfParse = (await import('pdf-parse')).default;
         const pdfData = await pdfParse(req.file.buffer);
         resumeText = pdfData.text;
       } else {
@@ -236,6 +237,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const candidateData = {
         initials,
+        fullName: parsedData.fullName,
         title: parsedData.title,
         location: parsedData.location,
         skills: parsedData.skills,
