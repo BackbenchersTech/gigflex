@@ -41,7 +41,12 @@ const AnalyticsDashboard = () => {
     );
   }
 
-  const { candidateViewStats, searchStats, topViewedCandidates, recentSearches } = analyticsData;
+  const { candidateViewStats, searchStats, topViewedCandidates, recentSearches } = analyticsData as {
+    candidateViewStats: any[];
+    searchStats: any[];
+    topViewedCandidates: any[];
+    recentSearches: any[];
+  };
 
   const totalViews = candidateViewStats.reduce((acc: number, stat: any) => acc + stat.viewCount, 0);
   const totalSearches = searchStats.reduce((acc: number, stat: any) => acc + stat.searchCount, 0);

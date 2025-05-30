@@ -14,13 +14,32 @@ interface SearchBarProps {
 const SearchBar = ({ 
   onSearch, 
   placeholder = "Search candidates by name, skills, title...", 
-  initialValue = ""
+  initialValue = "",
+  resultsCount = 0
 }: SearchBarProps) => {
   const [searchQuery, setSearchQuery] = useState(initialValue);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     onSearch(searchQuery);
+
+    // Track search if query is not empty
+    if (searchQuery.trim()) {
+      trackSearch(searchQuery.trim(), "general", resultsCount);
+    }
+  };
+
+  const trackSearch = async (query: string, searchType: string, resultsCount: number) => {
+    try {
+      await fetch("/api/analytics/search", {
+        method: "POST",
+        body: JSON.stringify({ query, searchType, resultsCount }),
+        headers: { "Content-Type": "application/json" }
+      });
+    } catch (error) {
+      // Silently fail search tracking to not disrupt user experience
+      console.error("Failed to track search:", error);
+    }
   };
 
   const handleClear = () => {

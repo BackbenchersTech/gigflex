@@ -1,6 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CandidateList from "@/components/admin/candidate-list";
 import CandidateForm from "@/components/admin/candidate-form";
+import AnalyticsDashboard from "@/components/admin/analytics-dashboard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -58,10 +59,11 @@ const AdminPage = () => {
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3 mb-8">
+        <TabsList className="grid w-full grid-cols-4 mb-8">
           <TabsTrigger value="candidates">Candidate Management</TabsTrigger>
           <TabsTrigger value="interests">Interest Requests</TabsTrigger>
           <TabsTrigger value="add-candidate">Add New Candidate</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
         
         <TabsContent value="candidates">
@@ -150,6 +152,20 @@ const AdminPage = () => {
             </CardHeader>
             <CardContent>
               <CandidateForm onSuccess={() => setActiveTab("candidates")} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="analytics">
+          <Card>
+            <CardHeader>
+              <CardTitle>Analytics Dashboard</CardTitle>
+              <CardDescription>
+                Track candidate views, search activity, and marketplace engagement metrics.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AnalyticsDashboard />
             </CardContent>
           </Card>
         </TabsContent>
