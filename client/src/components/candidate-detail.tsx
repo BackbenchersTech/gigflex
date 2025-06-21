@@ -6,6 +6,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -57,52 +58,60 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
   }, [candidate.id]);
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 p-6 overflow-y-auto pr-2 pb-16">
-        <DialogHeader className="text-left">
-          <div className="flex items-center gap-4">
-            <Avatar className="h-20 w-20 border-2 border-primary">
-              {candidate.profileImageUrl ? (
-                <AvatarImage
-                  src={candidate.profileImageUrl}
-                  alt={candidate.initials}
-                />
-              ) : (
-                <AvatarFallback className="text-xl bg-primary text-primary-foreground">
-                  {candidate.initials}
-                </AvatarFallback>
-              )}
-            </Avatar>
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <DialogTitle className="text-2xl font-bold">
-                  {candidate.initials}
-                </DialogTitle>
-                {candidate.isActive && (
-                  <Badge
-                    variant="outline"
-                    className="bg-green-50 text-green-600 border-green-200"
-                  >
-                    <CheckCircle2 className="h-3 w-3 mr-1" /> Available
-                  </Badge>
+    <>
+      <DialogHeader className="sr-only">
+        <DialogTitle>Candidate Profile: {candidate.initials}</DialogTitle>
+        <DialogDescription>
+          View detailed information about {candidate.initials}, {candidate.title} located in {candidate.location}
+        </DialogDescription>
+      </DialogHeader>
+      
+      <div className="flex flex-col h-full">
+        <div className="flex-1 p-6 overflow-y-auto pr-2 pb-16">
+          <div className="text-left">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-20 w-20 border-2 border-primary">
+                {candidate.profileImageUrl ? (
+                  <AvatarImage
+                    src={candidate.profileImageUrl}
+                    alt={candidate.initials}
+                  />
+                ) : (
+                  <AvatarFallback className="text-xl bg-primary text-primary-foreground">
+                    {candidate.initials}
+                  </AvatarFallback>
                 )}
-              </div>
-              <DialogDescription className="text-lg font-medium text-foreground mb-1">
-                {candidate.title}
-              </DialogDescription>
-              <div className="flex items-center text-muted-foreground text-sm">
-                <MapPin className="h-4 w-4 mr-1" />
-                {candidate.location}
-              </div>
-              <div className="text-green-600 font-medium text-sm mt-1">
-                <Banknote className="h-4 w-4 inline mr-1" />$
-                {candidate.billRate}/hr
+              </Avatar>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <h2 className="text-2xl font-bold">
+                    {candidate.initials}
+                  </h2>
+                  {candidate.isActive && (
+                    <Badge
+                      variant="outline"
+                      className="bg-green-50 text-green-600 border-green-200"
+                    >
+                      <CheckCircle2 className="h-3 w-3 mr-1" /> Available
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-lg font-medium text-foreground mb-1">
+                  {candidate.title}
+                </p>
+                <div className="flex items-center text-muted-foreground text-sm">
+                  <MapPin className="h-4 w-4 mr-1" />
+                  {candidate.location}
+                </div>
+                <div className="text-green-600 font-medium text-sm mt-1">
+                  <Banknote className="h-4 w-4 inline mr-1" />$
+                  {candidate.billRate}/hr
+                </div>
               </div>
             </div>
           </div>
-        </DialogHeader>
 
-        <div className="mt-6 space-y-6">
+          <div className="mt-6 space-y-6">
           {showInterestForm ? (
             <Card>
               <CardHeader className="pb-2">
@@ -292,31 +301,32 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
               </Card>
             </>
           )}
+          </div>
         </div>
+
+        <DialogFooter className="flex justify-end bg-blue-50 dark:bg-blue-900 border-t border-blue-200 dark:border-blue-700 p-0 h-16 sticky bottom-0 left-0 right-0 shadow-lg">
+          <div className="flex items-center space-x-4 py-2 mr-8 h-full">
+            <Button type="button" onClick={onClose} variant="outline" className="px-6 py-2">
+              Close
+            </Button>
+
+            {showInterestForm ? (
+              <Button
+                variant="secondary"
+                onClick={() => setShowInterestForm(false)}
+                className="px-6 py-2"
+              >
+                View Profile
+              </Button>
+            ) : (
+              <Button onClick={() => setShowInterestForm(true)} className="px-6 py-2">
+                Express Interest
+              </Button>
+            )}
+          </div>
+        </DialogFooter>
       </div>
-
-      <DialogFooter className="flex justify-end bg-blue-50 dark:bg-blue-900 border-t border-blue-200 dark:border-blue-700 p-0 h-16 sticky bottom-0 left-0 right-0 shadow-lg">
-        <div className="flex items-center space-x-4 py-2 mr-8 h-full">
-          <Button type="button" onClick={onClose} variant="outline" className="px-6 py-2">
-            Close
-          </Button>
-
-          {showInterestForm ? (
-            <Button
-              variant="secondary"
-              onClick={() => setShowInterestForm(false)}
-              className="px-6 py-2"
-            >
-              View Profile
-            </Button>
-          ) : (
-            <Button onClick={() => setShowInterestForm(true)} className="px-6 py-2">
-              Express Interest
-            </Button>
-          )}
-        </div>
-      </DialogFooter>
-    </div>
+    </>
   );
 };
 

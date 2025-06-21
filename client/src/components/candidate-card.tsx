@@ -99,7 +99,7 @@ const CandidateCard = ({ candidate }: CandidateCardProps) => {
         </Card>
       </DialogTrigger>
       
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto p-0 gap-0">
         <CandidateDetail candidate={candidate} onClose={() => setIsDialogOpen(false)} />
       </DialogContent>
     </Dialog>

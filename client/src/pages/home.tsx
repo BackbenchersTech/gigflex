@@ -41,10 +41,10 @@ const HomePage = () => {
       <div className="flex flex-col space-y-6">
         <div className="text-center max-w-3xl mx-auto">
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl mb-4">
-            Find Your Next Great Hire
+            Find your next Salesforce or ServiceNow expert
           </h1>
           <p className="text-xl text-muted-foreground">
-            Browse our curated selection of top talent available for your next project or full-time role.
+            Browse our curated selection of top talent available for your next project on-Demand or full-time role.
           </p>
         </div>
 
@@ -53,10 +53,10 @@ const HomePage = () => {
             <SearchBar 
               onSearch={handleSearch} 
               initialValue={searchQuery} 
-              placeholder="Try natural language search: 'React developer with 3+ years of experience'" 
+              placeholder="Try natural language search: 'ServiceNow developer with 3+ years of experience'" 
             />
             <p className="text-sm text-muted-foreground text-center">
-              You can search by skills, experience level, and availability (e.g., "JavaScript developer with 5 years available immediately")
+              You can search by skills, experience level, and availability
             </p>
           </div>
         </div>
