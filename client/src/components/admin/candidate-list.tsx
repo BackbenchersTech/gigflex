@@ -16,6 +16,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -327,11 +328,17 @@ const CandidateList = () => {
 
       {/* Edit/Create Candidate Dialog */}
       <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-6">
+          <DialogHeader className="mb-6">
             <DialogTitle>
               {selectedCandidate ? "Edit Candidate" : "Add New Candidate"}
             </DialogTitle>
+            <DialogDescription>
+              {selectedCandidate 
+                ? "Update the candidate's information below." 
+                : "Fill in the details to add a new candidate to the talent marketplace."
+              }
+            </DialogDescription>
           </DialogHeader>
           <CandidateForm 
             candidate={selectedCandidate || undefined} 
@@ -342,7 +349,7 @@ const CandidateList = () => {
 
       {/* View Candidate Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-0 gap-0">
           {selectedCandidate && (
             <CandidateDetail 
               candidate={selectedCandidate} 
