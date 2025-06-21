@@ -67,7 +67,7 @@ const CandidateDetail = ({ candidate, onClose }: CandidateDetailProps) => {
       </DialogHeader>
       
       <div className="flex flex-col h-full">
-        <div className="flex-1 p-6 overflow-y-auto pr-2 pb-16">
+        <div className="flex-1 px-6 pt-6 pb-16 overflow-y-auto">
           <div className="text-left">
             <div className="flex items-center gap-4">
               <Avatar className="h-20 w-20 border-2 border-primary">
