@@ -24,7 +24,8 @@
   --ring: 20 14.3% 4.1%;
   --radius: 0.5rem;
 }
-  .dark {
+
+.dark {
   --background: 240 10% 3.9%;
   --foreground: 0 0% 98%;
   --muted: 240 3.7% 15.9%;

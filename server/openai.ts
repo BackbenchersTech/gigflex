@@ -1,7 +1,8 @@
-import OpenAI from "openai";
+import OpenAI from 'openai';
+import { OPENAI_API_KEY } from './config';
 
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error("OPENAI_API_KEY environment variable is required");
+if (!OPENAI_API_KEY) {
+  throw new Error('OPENAI_API_KEY environment variable is required');
 }
 
 const openai = new OpenAI({
@@ -24,10 +25,10 @@ interface ParsedResume {
 export async function parseResume(resumeText: string): Promise<ParsedResume> {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: 'gpt-4o-mini',
       messages: [
         {
-          role: "system",
+          role: 'system',
           content: `You are a resume parser that extracts structured information from resumes. 
           Parse the resume text and return a JSON object with the following structure:
           {
@@ -46,33 +47,38 @@ export async function parseResume(resumeText: string): Promise<ParsedResume> {
           If any field is not found, use reasonable defaults or empty values.
           For experienceYears, calculate based on work history dates.
           For skills, extract technical skills, tools, and technologies mentioned.
-          For bio, create a concise professional summary based on the resume content.`
+          For bio, create a concise professional summary based on the resume content.`,
         },
         {
-          role: "user",
-          content: `Parse this resume:\n\n${resumeText}`
-        }
+          role: 'user',
+          content: `Parse this resume:\n\n${resumeText}`,
+        },
       ],
-      response_format: { type: "json_object" },
+      response_format: { type: 'json_object' },
       temperature: 0.1,
     });
 
-    const parsed = JSON.parse(response.choices[0].message.content || "{}");
-    
+    const parsed = JSON.parse(response.choices[0].message.content || '{}');
+
     return {
-      fullName: parsed.fullName || "Unknown",
-      title: parsed.title || "Professional",
-      location: parsed.location || "Location TBD",
-      email: parsed.email || "",
-      phone: parsed.phone || "",
+      fullName: parsed.fullName || 'Unknown',
+      title: parsed.title || 'Professional',
+      location: parsed.location || 'Location TBD',
+      email: parsed.email || '',
+      phone: parsed.phone || '',
       skills: Array.isArray(parsed.skills) ? parsed.skills : [],
-      experienceYears: typeof parsed.experienceYears === 'number' ? parsed.experienceYears : 0,
-      education: parsed.education || "Education information not provided",
-      bio: parsed.bio || "Experienced professional with proven expertise in their field.",
-      certifications: Array.isArray(parsed.certifications) ? parsed.certifications : [],
+      experienceYears:
+        typeof parsed.experienceYears === 'number' ? parsed.experienceYears : 0,
+      education: parsed.education || 'Education information not provided',
+      bio:
+        parsed.bio ||
+        'Experienced professional with proven expertise in their field.',
+      certifications: Array.isArray(parsed.certifications)
+        ? parsed.certifications
+        : [],
     };
   } catch (error) {
-    console.error("Error parsing resume:", error);
-    throw new Error("Failed to parse resume");
+    console.error('Error parsing resume:', error);
+    throw new Error('Failed to parse resume');
   }
 }
