@@ -6,7 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import Login from './Login';
 
 export const ProfileIconPopover = () => {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
 
   const handleSignOut = async () => {
     try {
@@ -18,7 +18,7 @@ export const ProfileIconPopover = () => {
 
   return (
     <Popover>
-      <PopoverTrigger>
+      <PopoverTrigger asChild>
         <Button variant='outline' size='icon' className='hidden md:flex'>
           <User className='h-4 w-4' />
           <span className='sr-only'>User</span>
@@ -26,9 +26,9 @@ export const ProfileIconPopover = () => {
       </PopoverTrigger>
 
       <PopoverContent>
-        {isAdmin ? (
+        {user ? (
           <>
-            <p className='mb-2'>Welcome, {user?.displayName || user?.email}</p>
+            <p className='mb-2'>Welcome, {user?.name || user?.email}</p>
             <Button className='w-full' onClick={handleSignOut}>
               Logout
             </Button>

@@ -7,31 +7,60 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth, User } from '@/hooks/useAuth';
 import { signInWithGoogle } from '@/lib/firebase';
+import { useMutation } from '@tanstack/react-query';
 import { Shield } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Login() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { setUser, isAdmin } = useAuth();
+  const { mutate: syncUser } = useMutation({
+    mutationFn: async (firebaseIdToken: string) => {
+      const response = await fetch('/api/auth/sync', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ firebaseIdToken }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error logging in');
+      }
+
+      return response.json();
+    },
+    onError: (error) => {
+      console.error('Error logging in', error.message);
+    },
+    onSuccess: (data: User) => {
+      setUser(data);
+      setLoading(false);
+      toast({
+        title: 'Welcome!',
+        description:
+          data.role.toLowerCase() === 'admin'
+            ? 'Successfully signed in to admin panel.'
+            : 'Successfully signed in.',
+      });
+    },
+  });
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
-      const user = await signInWithGoogle();
-      console.log('Signed in user:', user);
-      toast({
-        title: 'Welcome!',
-        description: 'Successfully signed in to admin panel.',
-      });
+      const firebaseUser = await signInWithGoogle();
+
+      syncUser(await firebaseUser.getIdToken());
     } catch (error) {
       toast({
         title: 'Authentication Failed',
         description: 'Unable to sign in. Please try again.',
         variant: 'destructive',
       });
-    } finally {
-      setLoading(false);
     }
   };
 

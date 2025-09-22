@@ -1,5 +1,5 @@
 import { onAuthStateChange } from '@/lib/firebase';
-import { User } from 'firebase/auth';
+import { useMutation } from '@tanstack/react-query';
 import {
   createContext,
   ReactNode,
@@ -8,11 +8,19 @@ import {
   useState,
 } from 'react';
 
-interface AuthContextType {
+export type User = {
+  id: string;
+  email: string;
+  name?: string;
+  picture?: string;
+  role: string;
+};
+
+type AuthContextType = {
   user: User | null;
-  loading: boolean;
+  setUser: (user: User | null) => void;
   isAdmin: boolean;
-}
+};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -22,25 +30,52 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { mutate: syncUser } = useMutation({
+    mutationFn: async (firebaseIdToken: string) => {
+      const response = await fetch('/api/auth/sync', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ firebaseIdToken }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error logging in');
+      }
+
+      return response.json();
+    },
+    onError: (error) => {
+      console.error('Error logging in', error.message);
+    },
+    onSuccess: (data: User) => {
+      setUser(data);
+    },
+  });
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChange((user) => {
-      setUser(user);
-      setLoading(false);
+    const unsubscribe = onAuthStateChange((firebaseUser) => {
+      if (!firebaseUser) {
+        setUser(null);
+        return;
+      }
+
+      const syncFirebaseUserToDB = async () => {
+        const idToken = await firebaseUser.getIdToken();
+        syncUser(idToken);
+      };
+
+      syncFirebaseUserToDB();
     });
 
     return () => unsubscribe();
   }, []);
 
-  // For now, consider any authenticated user as admin
-  // In production, you'd check user roles from your database
-  const isAdmin = !!user;
-
   const value = {
     user,
-    loading,
-    isAdmin,
+    setUser,
+    isAdmin: user?.role.toLowerCase() === 'admin',
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

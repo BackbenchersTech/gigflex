@@ -3,13 +3,16 @@ import {
   InsertCandidate,
   InsertInterest,
   Interest,
+  User,
   candidateViews,
   candidates,
   interests,
   searchActivity,
+  users,
 } from '@shared/schema';
 import { desc, eq, sql } from 'drizzle-orm';
 import { db } from './db';
+import { admin as fireAdmin } from './firebase';
 
 // Interface for storage operations
 export interface IStorage {
@@ -58,14 +61,52 @@ export interface IStorage {
   getRecentSearches(limit?: number): Promise<any[]>;
   getTotalSearchCount(): Promise<number>;
   getTotalViewCount(): Promise<number>;
+
+  // User operations
+  syncUser(firebaseUid: string): Promise<User>;
 }
 
 // Database implementation
 export class DatabaseStorage implements IStorage {
+  // User operations
+  async syncUser(idToken: string): Promise<User> {
+    try {
+      const {
+        user_id: firebaseUid,
+        email,
+        picture,
+        name,
+      } = await fireAdmin.auth().verifyIdToken(idToken);
+
+      const newUser = {
+        firebaseUid,
+        email: email || '',
+        picture: picture || null,
+        name: name || '',
+      };
+
+      const [insertedUser] = await db
+        .insert(users)
+        .values(newUser)
+        .onConflictDoUpdate({
+          target: users.firebaseUid,
+          set: {
+            email: newUser.email,
+            picture: newUser.picture,
+            name: newUser.name,
+          },
+        })
+        .returning();
+
+      return insertedUser;
+    } catch (error) {
+      console.error('Error verifying Firebase UID:', error);
+      throw new Error('Invalid Firebase UID');
+    }
+  }
+
   // Candidate operations
   async getCandidates(): Promise<Candidate[]> {
-    console.log('DatabaseStorage: Fetching candidates from database');
-    console.log('DB instance:', db);
     return await db.select().from(candidates);
   }
 

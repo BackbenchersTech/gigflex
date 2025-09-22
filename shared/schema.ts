@@ -5,9 +5,21 @@ import {
   serial,
   text,
   timestamp,
+  uuid,
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
+
+// User Schema
+export const users = pgTable('users', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  firebaseUid: text('firebase_uid').notNull().unique(),
+  name: text('name').notNull(),
+  email: text('email').notNull().unique(),
+  picture: text('picture'),
+  role: text('role').notNull().default('user'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
 
 // Candidate Schema
 export const candidates = pgTable('candidates', {
@@ -110,3 +122,5 @@ export type CandidateForm = z.infer<typeof candidateFormSchema>;
 export type Interest = typeof interests.$inferSelect;
 export type InsertInterest = z.infer<typeof insertInterestSchema>;
 export type InterestForm = z.infer<typeof interestFormSchema>;
+
+export type User = typeof users.$inferSelect;

@@ -90,6 +90,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // POST sync user by Firebase UID
+  app.post('/api/auth/sync', async (req, res) => {
+    try {
+      const { firebaseIdToken } = req.body;
+      const user = await storage.syncUser(firebaseIdToken);
+
+      res.status(200).json(user);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to sync user' });
+    }
+  });
+
   // POST create new candidate
   app.post('/api/candidates', async (req, res) => {
     try {
