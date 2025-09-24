@@ -9,5 +9,20 @@ if (!DATABASE_URL) {
   );
 }
 
-const client = postgres(DATABASE_URL);
-export const db = drizzle({ client, schema });
+let client;
+try {
+  client = postgres(DATABASE_URL);
+} catch (err) {
+  console.log('Error connecting to Postgres:', err);
+  throw err;
+}
+
+let db: ReturnType<typeof drizzle>;
+try {
+  db = drizzle({ client, schema });
+} catch (err) {
+  console.log('Error initializing Drizzle ORM:', err);
+  throw err;
+}
+
+export { db };

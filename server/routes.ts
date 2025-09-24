@@ -63,11 +63,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // GET all candidates
   app.get('/api/candidates', async (req, res) => {
-    console.log('Fetching all candidates');
     try {
       const candidates = await storage.getCandidates();
       res.json(candidates);
     } catch (error) {
+      console.error('Error in /api/candidates:', error);
       res.status(500).json({ message: 'Failed to fetch candidates' });
     }
   });

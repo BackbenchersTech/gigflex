@@ -107,6 +107,7 @@ export class DatabaseStorage implements IStorage {
 
   // Candidate operations
   async getCandidates(): Promise<Candidate[]> {
+    console.log('Fetching all candidates from the database');
     return await db.select().from(candidates);
   }
 
