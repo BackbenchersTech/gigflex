@@ -11,7 +11,7 @@ if (!DATABASE_URL) {
 
 let client;
 try {
-  client = postgres(DATABASE_URL);
+  client = postgres(DATABASE_URL, { prepare: false });
 } catch (err) {
   console.log('Error connecting to Postgres:', err);
   throw err;
@@ -19,7 +19,7 @@ try {
 
 let db: ReturnType<typeof drizzle>;
 try {
-  db = drizzle({ client, schema });
+  db = drizzle(client, { schema });
 } catch (err) {
   console.log('Error initializing Drizzle ORM:', err);
   throw err;
