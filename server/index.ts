@@ -57,11 +57,11 @@ app.use((req, res, next) => {
   }
 
   // this serves both the API and the client.
-  const port = 3000;
+  const port = process.env.PORT || 3000;
   server.listen(
     {
       port,
-      host: '127.0.0.1',
+      host: '0.0.0.0',
       reusePort: true,
     },
     () => {
