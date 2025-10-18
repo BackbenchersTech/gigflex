@@ -12,7 +12,9 @@ const HomePage = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Query for searching candidates
-  const candidatesQuery = useQuery<Candidate[]>({
+  const { data, isSuccess, isLoading, isError, refetch } = useQuery<
+    Candidate[]
+  >({
     queryKey: ['/api/candidates/search', searchQuery],
     queryFn: async () => {
       if (!searchQuery.trim()) {
@@ -26,13 +28,9 @@ const HomePage = () => {
   });
 
   // Filter to active candidates only
-  let filteredCandidates: Candidate[] = [];
-  try {
-    filteredCandidates =
-      candidatesQuery.data?.filter((candidate) => candidate.isActive) || [];
-  } catch (error) {
-    console.error('Error filtering candidates:', candidatesQuery.data, error);
-  }
+  let filteredCandidates: Candidate[] = isSuccess
+    ? data.filter((candidate) => candidate.isActive)
+    : [];
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -91,7 +89,7 @@ const HomePage = () => {
             </div>
           )}
 
-          {candidatesQuery.isLoading ? (
+          {isLoading ? (
             <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
               {[...Array(6)].map((_, i) => (
                 <div key={i} className='space-y-4'>
@@ -108,14 +106,14 @@ const HomePage = () => {
                 </div>
               ))}
             </div>
-          ) : candidatesQuery.isError ? (
+          ) : isError ? (
             <div className='text-center py-12'>
               <p className='text-destructive text-lg'>
                 Error loading candidates.
               </p>
               <Button
                 variant='outline'
-                onClick={() => candidatesQuery.refetch()}
+                onClick={() => refetch()}
                 className='mt-4'
               >
                 Try Again
