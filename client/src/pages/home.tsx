@@ -17,12 +17,28 @@ const HomePage = () => {
   >({
     queryKey: ['/api/candidates/search', searchQuery],
     queryFn: async () => {
-      if (!searchQuery.trim()) {
-        return fetch('/api/candidates').then((res) => res.json());
+      const url = !searchQuery.trim()
+        ? '/api/candidates'
+        : `/api/candidates/search?q=${encodeURIComponent(searchQuery)}`;
+
+      const res = await fetch(url);
+
+      // Parse body intelligently depending on content-type
+      const contentType = res.headers.get('content-type') || '';
+      const data = contentType.includes('application/json')
+        ? await res.json()
+        : await res.text();
+
+      if (!res.ok) {
+        const message =
+          (data && typeof data === 'object' && (data as any).message) ||
+          (typeof data === 'string'
+            ? data
+            : `Request failed with status ${res.status}`);
+        throw new Error(message);
       }
-      return fetch(
-        `/api/candidates/search?q=${encodeURIComponent(searchQuery)}`
-      ).then((res) => res.json());
+
+      return data as Candidate[];
     },
     enabled: true,
   });
