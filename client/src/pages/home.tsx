@@ -26,8 +26,13 @@ const HomePage = () => {
   });
 
   // Filter to active candidates only
-  const filteredCandidates =
-    candidatesQuery.data?.filter((candidate) => candidate.isActive) || [];
+  let filteredCandidates: Candidate[] = [];
+  try {
+    filteredCandidates =
+      candidatesQuery.data?.filter((candidate) => candidate.isActive) || [];
+  } catch (error) {
+    console.error('Error filtering candidates:', candidatesQuery.data, error);
+  }
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
